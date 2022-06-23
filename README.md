@@ -9,7 +9,6 @@ Requires the [synthesis fork of Storm](https://github.com/randriu/storm/tree/syn
 
 Python bindings for [Storm](https://www.stormchecker.org/), created using [PyBind11](https://pybind11.readthedocs.io/).
 
-
 For more information, please check the [documentation](https://moves-rwth.github.io/stormpy/).
 
 
