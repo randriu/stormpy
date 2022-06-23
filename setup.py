@@ -269,6 +269,7 @@ setup(
                  CMakeExtension('dft', subdir='dft'),
                  CMakeExtension('gspn', subdir='gspn'),
                  CMakeExtension('pars', subdir='pars'),
+                 CMakeExtension('synthesis', subdir='synthesis'), #+
                  CMakeExtension('pomdp', subdir='pomdp')],
 
     cmdclass={'build_ext': CMakeBuild},
