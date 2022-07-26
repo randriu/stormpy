@@ -3,6 +3,9 @@ Changelog
 
 Version 1.6.x
 -------------
+
+- POMDP makebinary/makesimple signature change
+
 ### Version 1.6.?
 - Bindings for maximal end components
 - Support for computing expected number of visits
