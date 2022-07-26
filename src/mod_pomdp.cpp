@@ -5,6 +5,7 @@
 #include "pomdp/qualitative_analysis.h"
 #include "pomdp/transformations.h"
 #include "pomdp/memory.h"
+#include "pomdp/verification.h"
 #include <storm/adapters/RationalFunctionAdapter.h>
 
 PYBIND11_MODULE(pomdp, m) {
@@ -22,6 +23,6 @@ PYBIND11_MODULE(pomdp, m) {
     define_transformations_nt(m);
     define_transformations<double>(m, "Double");
     define_transformations<storm::RationalNumber>(m, "Exact");
-
     define_transformations<storm::RationalFunction>(m, "Rf");
+    define_verification<double>(m, "Double");
 }

@@ -19,7 +19,7 @@ std::shared_ptr<storm::models::sparse::Pomdp<ValueType>> unfold_memory(storm::mo
 }
 
 template<typename ValueType>
-std::shared_ptr<storm::models::sparse::Pomdp<ValueType>> make_simple(storm::models::sparse::Pomdp<ValueType> const& pomdp, bool keepStateValuations) {
+storm::transformer::PomdpTransformationResult<ValueType> make_simple(storm::models::sparse::Pomdp<ValueType> const& pomdp, bool keepStateValuations) {
     storm::transformer::BinaryPomdpTransformer<ValueType> transformer;
     return transformer.transform(pomdp,true, keepStateValuations);
 }
@@ -45,7 +45,6 @@ void define_transformations_nt(py::module &m) {
             .value("simple_log", storm::transformer::PomdpFscApplicationMode::SIMPLE_LOG)
             .value("full", storm::transformer::PomdpFscApplicationMode::FULL)
             ;
-
 }
 
 template<typename ValueType>
@@ -61,6 +60,10 @@ void define_transformations(py::module& m, std::string const& vtSuffix) {
     unfolder.def("transform", &storm::pomdp::ObservationTraceUnfolder<ValueType>::transform, py::arg("trace"));
     unfolder.def("extend", &storm::pomdp::ObservationTraceUnfolder<ValueType>::extend, py::arg("new_observation"));
     unfolder.def("reset", &storm::pomdp::ObservationTraceUnfolder<ValueType>::reset, py::arg("new_observation"));
+
+    py::class_<storm::transformer::PomdpTransformationResult<ValueType>> ptres(m, ("PomdpTransformationResult" + vtSuffix).c_str(), "Result container for POMDP transformations");
+    ptres.def_readonly("transformed_pomdp", &storm::transformer::PomdpTransformationResult<ValueType>::transformedPomdp, "The resulting POMDP");
+    ptres.def_readonly("state_mapping", &storm::transformer::PomdpTransformationResult<ValueType>::transformedStateToOriginalStateMap, "State to original state mapping");
 }
 
 template void define_transformations<double>(py::module& m, std::string const& vtSuffix);
