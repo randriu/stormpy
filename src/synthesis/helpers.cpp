@@ -10,6 +10,8 @@
 
 #include "storm/utility/initialize.h"
 
+#include "storm-synthesis/madp/Madp.h"
+
 template<typename ValueType>
 std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
     std::shared_ptr<storm::models::sparse::Model<ValueType>> model,
@@ -52,6 +54,11 @@ void define_helpers(py::module& m) {
             bv.set(action);
         return bv;
     }, py::arg("default_actions"), py::arg("selected_actions"));
+
+    m.def("madp_test", [] (std::string filename) {
+        storm::synthesis::test(filename);
+        return 42;
+    }, py::arg("filename"));
 
 }
 
