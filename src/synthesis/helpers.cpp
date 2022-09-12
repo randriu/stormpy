@@ -32,6 +32,26 @@ std::shared_ptr<storm::modelchecker::CheckResult> getExpectedNumberOfVisits(stor
     return storm::api::computeExpectedVisitingTimesWithSparseEngine(env, model);
 }
 
+template<typename ValueType>
+std::shared_ptr<storm::logic::Formula> transformUntilToEventually(
+    storm::logic::Formula const& formula
+) {
+    auto const& of = formula.asOperatorFormula();
+    bool is_reward = of.isRewardOperatorFormula();
+
+    auto ef = std::make_shared<storm::logic::EventuallyFormula>(
+        of.getSubformula().asUntilFormula().getRightSubformula().asSharedPointer(),
+        !is_reward ? storm::logic::FormulaContext::Probability : storm::logic::FormulaContext::Reward);
+
+    std::shared_ptr<storm::logic::Formula> modified_formula;
+    if(!is_reward) {
+        modified_formula = std::make_shared<storm::logic::ProbabilityOperatorFormula>(ef, of.getOperatorInformation());
+    } else {
+        modified_formula = std::make_shared<storm::logic::RewardOperatorFormula>(ef, of.asRewardOperatorFormula().getRewardModelName(), of.getOperatorInformation());
+    }
+
+    return modified_formula;
+}
 
 // Define python bindings
 void define_helpers(py::module& m) {
@@ -45,6 +65,7 @@ void define_helpers(py::module& m) {
     }, py::arg("matrix"), py::arg("vector"));
 
     m.def("model_check_with_hint", &modelCheckWithHint<double>, "Perform model checking using the sparse engine", py::arg("model"), py::arg("task"), py::arg("environment"), py::arg("hint_values"));
+    m.def("transform_until_to_eventually", &transformUntilToEventually<double>, py::arg("formula"));
     
     m.def("compute_expected_number_of_visits", &getExpectedNumberOfVisits<double>, py::arg("env"), py::arg("model"));
 
