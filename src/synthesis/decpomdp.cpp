@@ -1,7 +1,6 @@
 #include "synthesis.h"
 
-#include "storm-synthesis/madp/DecPomdp.h"
-#include "storm-synthesis/madp/base/DecPOMDPDiscrete.h"
+#include "storm-synthesis/decpomdp/DecPomdp.h"
 
 
 // Define python bindings
