@@ -12,6 +12,8 @@ void define_verification(py::module& m, std::string const& vtSuffix) {
     bepmcoptions.def(py::init<bool, bool>(), py::arg("discretize"), py::arg("unfold"));
     bepmcoptions.def_readwrite("use_explicit_cutoff", &Options::useExplicitCutoff);
     bepmcoptions.def_readwrite("size_threshold_init", &Options::sizeThresholdInit);
+    bepmcoptions.def_readwrite("use_grid_clipping", &Options::useGridClipping);
+    bepmcoptions.def_readwrite("exploration_time_limit", &Options::explorationTimeLimit);
 
     py::class_<typename storm::pomdp::modelchecker::BeliefExplorationPomdpModelChecker<storm::models::sparse::Pomdp<ValueType>>::Result> bepmcres(m, ("BeliefExplorationPomdpModelCheckerResult" + vtSuffix).c_str());
     bepmcres.def_readonly("induced_mc_from_scheduler", &storm::pomdp::modelchecker::BeliefExplorationPomdpModelChecker<storm::models::sparse::Pomdp<ValueType>>::Result::schedulerAsMarkovChain);
