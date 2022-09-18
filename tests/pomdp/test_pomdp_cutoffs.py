@@ -12,6 +12,7 @@ class TestModelChecking:
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
         options.size_threshold_init = 10
+        options.use_grid_clipping = False
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(model, options);
         result = belmc.check(formulas[0].raw_formula, [])
         print(result.lower_bound)
@@ -27,6 +28,7 @@ class TestModelChecking:
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
         options.size_threshold_init = 10
+        options.use_grid_clipping = False
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(model, options);
         result = belmc.check(formulas[0].raw_formula, [])
         print(result.lower_bound)
@@ -42,6 +44,7 @@ class TestModelChecking:
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
         options.size_threshold_init = 10
+        options.use_grid_clipping = False
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(model, options);
         result = belmc.check(formulas[0].raw_formula, [])
         print(result.lower_bound)
