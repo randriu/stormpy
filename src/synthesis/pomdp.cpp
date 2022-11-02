@@ -1,6 +1,7 @@
 #include "synthesis.h"
 
 #include "storm-synthesis/pomdp/PomdpManager.h"
+#include "storm-synthesis/pomdp/PomdpManagerAposteriori.h"
 
 // Define python bindings
 void define_pomdp(py::module& m) {
@@ -8,7 +9,6 @@ void define_pomdp(py::module& m) {
     py::class_<storm::synthesis::PomdpManager<double>>(m, "PomdpManager", "POMDP manager")
         .def(py::init<storm::models::sparse::Pomdp<double> const&>(), "Constructor.", py::arg("pomdp"))
         .def("construct_mdp", &storm::synthesis::PomdpManager<double>::constructMdp, "Unfold memory model (a priori memory update) into the POMDP.")
-        .def("construct_mdp_aposteriori", &storm::synthesis::PomdpManager<double>::constructMdpAposteriori, "Unfold memory model (a posteriori memory update) into the POMDP.")
         .def("set_observation_memory_size", &storm::synthesis::PomdpManager<double>::setObservationMemorySize, "Set memory size to a selected observation.", py::arg("observation"), py::arg("memory_size"))
         .def("set_global_memory_size", &storm::synthesis::PomdpManager<double>::setGlobalMemorySize, "Set memory size to all observations.", py::arg("memory_size"))
         .def_property_readonly("state_prototype", [](storm::synthesis::PomdpManager<double>& manager) {return manager.state_prototype;}, "TODO")
@@ -25,6 +25,13 @@ void define_pomdp(py::module& m) {
         .def_property_readonly("row_action_option", [](storm::synthesis::PomdpManager<double>& manager) {return manager.row_action_option;}, "TODO")
         .def_property_readonly("row_memory_hole", [](storm::synthesis::PomdpManager<double>& manager) {return manager.row_memory_hole;}, "TODO")
         .def_property_readonly("row_memory_option", [](storm::synthesis::PomdpManager<double>& manager) {return manager.row_memory_option;}, "TODO")
+        ;
+
+    py::class_<storm::synthesis::PomdpManagerAposteriori<double>>(m, "PomdpManagerAposteriori", "POMDP manager (a posteriori)")
+        .def(py::init<storm::models::sparse::Pomdp<double> const&>(), "Constructor.", py::arg("pomdp"))
+        .def("construct_mdp", &storm::synthesis::PomdpManagerAposteriori<double>::constructMdp, "Unfold memory model (a posteriori memory update) into the POMDP.")
+        .def("set_observation_memory_size", &storm::synthesis::PomdpManagerAposteriori<double>::setObservationMemorySize, "Set memory size to a selected observation.", py::arg("observation"), py::arg("memory_size"))
+        .def("set_global_memory_size", &storm::synthesis::PomdpManagerAposteriori<double>::setGlobalMemorySize, "Set memory size to all observations.", py::arg("memory_size"))        
         ;
 }
 
