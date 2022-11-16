@@ -3,7 +3,6 @@
 #include "storm-synthesis/pomdp/PomdpManager.h"
 #include "storm-synthesis/pomdp/PomdpManagerAposteriori.h"
 
-// Define python bindings
 void define_pomdp(py::module& m) {
 
     py::class_<storm::synthesis::PomdpManager<double>>(m, "PomdpManager", "POMDP manager")

@@ -5,4 +5,5 @@
 void define_synthesis(py::module& m);
 void define_helpers(py::module &m);
 void define_pomdp(py::module &m);
+void define_pomdp_builder(py::module &m);
 void define_decpomdp(py::module &m);
