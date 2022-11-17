@@ -20,6 +20,8 @@ void define_verification(py::module& m, std::string const& vtSuffix) {
     bepmcoptions.def_readwrite("size_threshold_factor", &Options::sizeThresholdFactor);
     bepmcoptions.def_readwrite("refine_precision", &Options::refinePrecision);
     bepmcoptions.def_readwrite("refine", &Options::refine);
+    bepmcoptions.def_readwrite("exploration_heuristic", &Options::explorationHeuristic);
+    bepmcoptions.def_readwrite("preproc_minmax_method", &Options::preProcMinMaxMethod);
     
     py::class_<typename storm::pomdp::modelchecker::BeliefExplorationPomdpModelChecker<storm::models::sparse::Pomdp<ValueType>>::Result> bepmcres(m, ("BeliefExplorationPomdpModelCheckerResult" + vtSuffix).c_str());
     bepmcres.def_readonly("induced_mc_from_scheduler", &storm::pomdp::modelchecker::BeliefExplorationPomdpModelChecker<storm::models::sparse::Pomdp<ValueType>>::Result::schedulerAsMarkovChain);
