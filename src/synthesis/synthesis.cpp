@@ -1,6 +1,7 @@
 #include "synthesis.h"
 
 #include "storm-synthesis/synthesis/Counterexample.h"
+#include "storm-synthesis/synthesis/CounterexampleMdp.h"
 
 // Define python bindings
 void define_synthesis(py::module& m) {
@@ -44,6 +45,21 @@ void define_synthesis(py::module& m) {
             },
             "Read stats."
         );*/
+        ;
+
+    // Counterexample generation
+    py::class_<storm::synthesis::CounterexampleGeneratorMdp<>>(
+        m, "CounterexampleGeneratorMdp", "Counterexample generation"
+    )
+        .def(
+            py::init<
+                storm::models::sparse::Mdp<double> const&,
+                uint_fast64_t,
+                std::vector<std::set<uint_fast64_t>> const&,
+                std::vector<std::shared_ptr<storm::logic::Formula const>> const&
+            >())
+        .def("prepare_mdp", &storm::synthesis::CounterexampleGeneratorMdp<>::prepareMdp)
+        .def("construct_conflict", &storm::synthesis::CounterexampleGeneratorMdp<>::constructConflict)
         ;
     
 }
