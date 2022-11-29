@@ -10,6 +10,9 @@
 
 #include "storm/utility/initialize.h"
 
+#include "storm/environment/solver/NativeSolverEnvironment.h"
+#include "storm/environment/solver/MinMaxSolverEnvironment.h"
+
 template<typename ValueType>
 std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
     std::shared_ptr<storm::models::sparse::Model<ValueType>> model,
@@ -73,6 +76,13 @@ void define_helpers(py::module& m) {
             bv.set(action);
         return bv;
     }, py::arg("default_actions"), py::arg("selected_actions"));
+
+    m.def("set_precision_native", [](storm::NativeSolverEnvironment& nsenv, double value) {
+        nsenv.setPrecision(storm::utility::convertNumber<storm::RationalNumber>(value));
+    });
+    m.def("set_precision_minmax", [](storm::MinMaxSolverEnvironment& nsenv, double value) {
+        nsenv.setPrecision(storm::utility::convertNumber<storm::RationalNumber>(value));
+    });
 
 }
 
