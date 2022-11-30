@@ -10,6 +10,11 @@
 
 #include "storm/utility/initialize.h"
 
+#include "storm/environment/solver/NativeSolverEnvironment.h"
+#include "storm/environment/solver/MinMaxSolverEnvironment.h"
+
+#include "storm-synthesis/synthesis/MdpModelChecker.h"
+
 template<typename ValueType>
 std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
     std::shared_ptr<storm::models::sparse::Model<ValueType>> model,
@@ -62,7 +67,7 @@ void define_helpers(py::module& m) {
         return result;
     }, py::arg("matrix"), py::arg("vector"));
 
-    m.def("model_check_with_hint", &modelCheckWithHint<double>, "Perform model checking using the sparse engine", py::arg("model"), py::arg("task"), py::arg("environment"), py::arg("hint_values"));
+    m.def("model_check_with_hint", &modelCheckWithHint<double>);
     m.def("transform_until_to_eventually", &transformUntilToEventually<double>, py::arg("formula"));
     
     m.def("compute_expected_number_of_visits", &getExpectedNumberOfVisits<double>, py::arg("env"), py::arg("model"));
@@ -74,5 +79,13 @@ void define_helpers(py::module& m) {
         return bv;
     }, py::arg("default_actions"), py::arg("selected_actions"));
 
+    m.def("set_precision_native", [](storm::NativeSolverEnvironment& nsenv, double value) {
+        nsenv.setPrecision(storm::utility::convertNumber<storm::RationalNumber>(value));
+    });
+    m.def("set_precision_minmax", [](storm::MinMaxSolverEnvironment& nsenv, double value) {
+        nsenv.setPrecision(storm::utility::convertNumber<storm::RationalNumber>(value));
+    });
+
+    m.def("verify_mdp", &storm::synthesis::verifyMdp<double>);
 }
 
