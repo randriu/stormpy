@@ -15,4 +15,5 @@ PYBIND11_MODULE(synthesis, m) {
     define_pomdp(m);
     define_pomdp_builder(m);
     define_decpomdp(m);
+    define_simulation(m);
 }
