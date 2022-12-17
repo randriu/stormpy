@@ -19,6 +19,7 @@ void define_verification(py::module& m, std::string const& vtSuffix) {
     bepmcoptions.def_readwrite("gap_threshold_init", &Options::gapThresholdInit);
     bepmcoptions.def_readwrite("size_threshold_factor", &Options::sizeThresholdFactor);
     bepmcoptions.def_readwrite("refine_precision", &Options::refinePrecision);
+    bepmcoptions.def_readwrite("refine_step_limit", &Options::refineStepLimit);
     bepmcoptions.def_readwrite("refine", &Options::refine);
     bepmcoptions.def_readwrite("exploration_heuristic", &Options::explorationHeuristic);
     bepmcoptions.def_readwrite("preproc_minmax_method", &Options::preProcMinMaxMethod);
