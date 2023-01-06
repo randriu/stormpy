@@ -15,13 +15,10 @@ void define_verification(py::module& m, std::string const& vtSuffix) {
     bepmc.def("is_exploring", &storm::pomdp::modelchecker::BeliefExplorationPomdpModelChecker<storm::models::sparse::Pomdp<ValueType>>::isExploring);
     bepmc.def("get_interactive_result", &storm::pomdp::modelchecker::BeliefExplorationPomdpModelChecker<storm::models::sparse::Pomdp<ValueType>>::getInteractiveResult);
     bepmc.def("get_status", &storm::pomdp::modelchecker::BeliefExplorationPomdpModelChecker<storm::models::sparse::Pomdp<ValueType>>::getStatus);
+    bepmc.def("get_interactive_belief_explorer", &storm::pomdp::modelchecker::BeliefExplorationPomdpModelChecker<storm::models::sparse::Pomdp<ValueType>>::getInteractiveBeliefExplorer);
 
-    //py::enum_<BeliefExplorationPomdpModelChecker::Status>(bepmc, "Status")
-    //    .value("Uninitialized", BeliefExplorationPomdpModelChecker::Status::Uninitialized)
-    //    .value("Exploring", BeliefExplorationPomdpModelChecker::Status::Exploring)
-    //    .value("ModelExplorationFinished", BeliefExplorationPomdpModelChecker::Status::ModelExplorationFinished)
-    //    .value("ResultAvailable", BeliefExplorationPomdpModelChecker::Status::ResultAvailable)
-    //    .value("Terminated", BeliefExplorationPomdpModelChecker::Status::Terminated);
+    py::class_<typename storm::builder::BeliefMdpExplorer<storm::models::sparse::Pomdp<ValueType>>> bmdpe(m, ("BeliefMdpExplorer" + vtSuffix).c_str());
+    bmdpe.def("set_fsc_values", &storm::builder::BeliefMdpExplorer<storm::models::sparse::Pomdp<ValueType>>::setFMSchedValueList, py::arg("value_list"));
 
     py::class_<Options> bepmcoptions(m, ("BeliefExplorationModelCheckerOptions" + vtSuffix).c_str());
     bepmcoptions.def(py::init<bool, bool>(), py::arg("discretize"), py::arg("unfold"));
