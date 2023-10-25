@@ -222,6 +222,7 @@ setup(
                  CMakeExtension('dft'),
                  CMakeExtension('gspn'),
                  CMakeExtension('pars'),
+                 CMakeExtension('synthesis'), #+
                  CMakeExtension('pomdp')
                  ],
     cmdclass={'build_ext': CMakeBuild},
