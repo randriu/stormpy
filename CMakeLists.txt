@@ -106,6 +106,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/info_config.py.in ${CMAKE_LIBRA
 stormpy_module(logic)
 stormpy_module(storage)
 stormpy_module(utility)
+stormpy_module(synthesis) #+
 
 # Optional modules
 if(HAVE_STORM_DFT)
