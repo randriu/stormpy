@@ -1,5 +1,7 @@
 #include "synthesis.h"
 
+#include "verification/MdpModelChecker.h"
+
 #include "storm/modelchecker/CheckTask.h"
 #include "storm/modelchecker/results/CheckResult.h"
 #include "storm/environment/Environment.h"
@@ -13,7 +15,6 @@
 #include "storm/environment/solver/NativeSolverEnvironment.h"
 #include "storm/environment/solver/MinMaxSolverEnvironment.h"
 
-#include "storm-synthesis/synthesis/MdpModelChecker.h"
 
 template<typename ValueType>
 std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
@@ -86,6 +87,6 @@ void define_helpers(py::module& m) {
         nsenv.setPrecision(storm::utility::convertNumber<storm::RationalNumber>(value));
     });
 
-    m.def("verify_mdp", &storm::synthesis::verifyMdp<double>);
+    m.def("verify_mdp", &synthesis::verifyMdp<double>);
 }
 

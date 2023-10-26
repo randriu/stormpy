@@ -3,7 +3,6 @@
 void define_synthesis(py::module& m) {
 
     define_decpomdp(m);
-    define_games(m);
     define_helpers(m);
     define_pomdp(m);
     define_pomdp_builder(m);

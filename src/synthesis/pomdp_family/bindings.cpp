@@ -3,6 +3,7 @@
 #include "JaniChoices.h"
 #include "ObservationEvaluator.h"
 #include "QuotientPomdpManager.h"
+#include "StochasticGameSolver.h"
 
 void bindings_pomdp_family(py::module& m) {
 
@@ -27,5 +28,13 @@ void bindings_pomdp_family(py::module& m) {
         .def("make_product_with_fsc", &synthesis::QuotientPomdpManager<double>::makeProductWithFsc, py::arg("num_nodes"), py::arg("action_function"), py::arg("udate_function"))
         .def_property_readonly("product", [](synthesis::QuotientPomdpManager<double>& m) {return m.product;} )
         .def_property_readonly("product_choice_to_choice", [](synthesis::QuotientPomdpManager<double>& m) {return m.product_choice_to_choice;} )
+        ;
+
+    py::class_<synthesis::StochasticGameSolver<double>>(m, "StochasticGameSolver")
+        .def(py::init<>())
+        .def("solve", &synthesis::StochasticGameSolver<double>::solve)
+        .def_property_readonly("player1_state_values", [](synthesis::StochasticGameSolver<double>& solver) {return solver.player1_state_values;})
+        .def_property_readonly("player1_choices", [](synthesis::StochasticGameSolver<double>& solver) {return solver.player1_choices;})
+        .def_property_readonly("player2_choices", [](synthesis::StochasticGameSolver<double>& solver) {return solver.player2_choices;})
         ;
 }
