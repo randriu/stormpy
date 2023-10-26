@@ -4,7 +4,7 @@
 #include "ObservationEvaluator.h"
 #include "QuotientPomdpManager.h"
 
-void pomdp_family_bindings(py::module& m) {
+void bindings_pomdp_family(py::module& m) {
 
     m.def("add_choice_labels_from_jani", &synthesis::addChoiceLabelsFromJani<double>);
 

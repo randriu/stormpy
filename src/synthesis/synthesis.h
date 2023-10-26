@@ -10,4 +10,5 @@ void define_pomdp(py::module &m);
 void define_pomdp_builder(py::module &m);
 void define_simulation(py::module &m);
 
-void pomdp_family_bindings(py::module &m);
+void bindings_pomdp_family(py::module &m);
+void bindings_counterexamples(py::module &m);
