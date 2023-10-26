@@ -96,6 +96,6 @@ void define_pomdp_family(py::module& m) {
         )
         .def("make_product_with_fsc", &storm::synthesis::QuotientPomdpManager<double>::makeProductWithFsc, py::arg("num_nodes"), py::arg("action_function"), py::arg("udate_function"))
         .def_property_readonly("product", [](storm::synthesis::QuotientPomdpManager<double>& m) {return m.product;} )
-        .def_property_readonly("choice_product_to_original", [](storm::synthesis::QuotientPomdpManager<double>& m) {return m.choice_product_to_original;} )
+        .def_property_readonly("product_choice_to_choice", [](storm::synthesis::QuotientPomdpManager<double>& m) {return m.product_choice_to_choice;} )
         ;
 }
