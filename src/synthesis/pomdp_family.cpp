@@ -12,7 +12,7 @@
  */
 template<typename ValueType>
 storm::models::sparse::ChoiceLabeling reconstructChoiceLabelsFromJani(storm::models::sparse::Model<ValueType> const& model) {
-    uint32_t num_choices = model.getNumberOfChoices();
+    uint64_t num_choices = model.getNumberOfChoices();
     auto const& co = model.getChoiceOrigins()->asJaniChoiceOrigins();
     auto const& jani = co.getModel();
 
@@ -21,7 +21,7 @@ storm::models::sparse::ChoiceLabeling reconstructChoiceLabelsFromJani(storm::mod
         choice_labeling.addLabel(action.getName(), storm::storage::BitVector(num_choices,false));
     }
     
-    for(uint32_t choice = 0; choice < num_choices; choice++) {
+    for(uint64_t choice = 0; choice < num_choices; choice++) {
         for(auto const& aut_edge: co.getEdgeIndexSet(choice)) {
             auto [aut_index,edge_index] = jani.decodeAutomatonAndEdgeIndices(aut_edge);
             auto action_index = jani.getAutomaton(aut_index).getEdge(edge_index).getActionIndex();
@@ -49,8 +49,8 @@ void makeChoiceLabelingCanonic(
         }
     }
     storm::storage::BitVector no_label_labeling(model.getNumberOfChoices());
-    for(uint32_t choice = 0; choice < model.getNumberOfChoices(); choice++) {
-        uint32_t choice_num_labels = choice_labeling.getLabelsOfChoice(choice).size();
+    for(uint64_t choice = 0; choice < model.getNumberOfChoices(); choice++) {
+        uint64_t choice_num_labels = choice_labeling.getLabelsOfChoice(choice).size();
         if(choice_num_labels > 1) {
             throw std::invalid_argument("A choice of the model contains multiple labels.");
         }
@@ -79,7 +79,7 @@ void define_pomdp_family(py::module& m) {
     m.def("add_choice_labels_from_jani", &addChoiceLabelsFromJani<double>);
 
     py::class_<storm::synthesis::ObservationEvaluator<double>>(m, "ObservationEvaluator")
-        .def(py::init<storm::prism::Program &,storm::models::sparse::Model<double> const& >(), "Constructor.", py::arg("prism"), py::arg("model"))
+        .def(py::init<storm::prism::Program &,storm::models::sparse::Model<double> const& >(), py::arg("prism"), py::arg("model"))
         .def_property_readonly("num_obs_expressions", [](storm::synthesis::ObservationEvaluator<double>& e) {return e.num_obs_expressions;} )
         .def_property_readonly("obs_expr_label", [](storm::synthesis::ObservationEvaluator<double>& e) {return e.obs_expr_label;} )
         .def_property_readonly("obs_expr_is_boolean", [](storm::synthesis::ObservationEvaluator<double>& e) {return e.obs_expr_is_boolean;} )
@@ -87,5 +87,15 @@ void define_pomdp_family(py::module& m) {
         .def_property_readonly("state_to_obs_class", [](storm::synthesis::ObservationEvaluator<double>& e) {return e.state_to_obs_class;} )
         .def("obs_class_value", &storm::synthesis::ObservationEvaluator<double>::observationClassValue, py::arg("obs_class"), py::arg("obs_expr"))
         .def("add_observations_to_submdp", &storm::synthesis::ObservationEvaluator<double>::addObservationsToSubMdp, py::arg("mdp"), py::arg("state_sub_to_full"))
+        ;
+
+    py::class_<storm::synthesis::QuotientPomdpManager<double>>(m, "QuotientPomdpManager")
+        .def(
+            py::init<storm::models::sparse::Model<double> const&, std::vector<uint32_t>, uint64_t, std::vector<uint64_t>>(),
+            py::arg("quotient"), py::arg("state_to_obs_class"), py::arg("num_actions"), py::arg("choice_to_action")
+        )
+        .def("make_product_with_fsc", &storm::synthesis::QuotientPomdpManager<double>::makeProductWithFsc, py::arg("num_nodes"), py::arg("action_function"), py::arg("udate_function"))
+        .def_property_readonly("product", [](storm::synthesis::QuotientPomdpManager<double>& m) {return m.product;} )
+        .def_property_readonly("choice_product_to_original", [](storm::synthesis::QuotientPomdpManager<double>& m) {return m.choice_product_to_original;} )
         ;
 }
