@@ -6,6 +6,15 @@
 // Define python bindings
 void define_synthesis(py::module& m) {
 
+    define_decpomdp(m);
+    define_games(m);
+    define_helpers(m);
+    define_pomdp(m);
+    define_pomdp_builder(m);
+    define_simulation(m);
+    
+    pomdp_family_bindings(m);
+
     // Counterexample generation
     py::class_<storm::synthesis::CounterexampleGenerator<>>(
         m, "CounterexampleGenerator", "Counterexample generation"

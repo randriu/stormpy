@@ -3,7 +3,7 @@
 #include "synthesis/synthesis.h"
 
 PYBIND11_MODULE(synthesis, m) {
-    m.doc() = "Synthesis";
+    m.doc() = "Synthesis extension of Stormpy.";
 
 #ifdef STORMPY_DISABLE_SIGNATURE_DOC
     py::options options;
@@ -11,11 +11,4 @@ PYBIND11_MODULE(synthesis, m) {
 #endif
 
     define_synthesis(m);
-    define_decpomdp(m);
-    define_games(m);
-    define_helpers(m);
-    define_pomdp(m);
-    define_pomdp_builder(m);
-    define_pomdp_family(m);
-    define_simulation(m);
 }
