@@ -1,8 +1,8 @@
 #include "DecPomdp.h"
 
-#include "storm-synthesis/decpomdp/madp/src/base/Globals.h"
-#include "storm-synthesis/decpomdp/madp/src/base/E.h"
-#include "storm-synthesis/decpomdp/madp/src/parser/MADPParser.h"
+#include "madp/src/base/Globals.h"
+#include "madp/src/base/E.h"
+#include "madp/src/parser/MADPParser.h"
 
 #include <stack>
 
