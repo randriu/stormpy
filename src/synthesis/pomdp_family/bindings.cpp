@@ -3,7 +3,7 @@
 #include "JaniChoices.h"
 #include "ObservationEvaluator.h"
 #include "QuotientPomdpManager.h"
-#include "StochasticGameSolver.h"
+#include "GameAbstractionSolver.h"
 
 void bindings_pomdp_family(py::module& m) {
 
@@ -30,11 +30,15 @@ void bindings_pomdp_family(py::module& m) {
         .def_property_readonly("product_choice_to_choice", [](synthesis::QuotientPomdpManager<double>& m) {return m.product_choice_to_choice;} )
         ;
 
-    py::class_<synthesis::StochasticGameSolver<double>>(m, "StochasticGameSolver")
-        .def(py::init<>())
-        .def("solve", &synthesis::StochasticGameSolver<double>::solve)
-        .def_property_readonly("player1_state_values", [](synthesis::StochasticGameSolver<double>& solver) {return solver.player1_state_values;})
-        .def_property_readonly("player1_choices", [](synthesis::StochasticGameSolver<double>& solver) {return solver.player1_choices;})
-        .def_property_readonly("player2_choices", [](synthesis::StochasticGameSolver<double>& solver) {return solver.player2_choices;})
+    py::class_<synthesis::GameAbstractionSolver<double>>(m, "GameAbstractionSolver")
+        .def(
+            py::init<storm::models::sparse::Model<double> const&, std::vector<uint64_t> const&,
+            std::vector<std::vector<uint32_t>> const&, std::string const&>(),
+            py::arg("quotient"), py::arg("choice_to_action"), py::arg("state_to_actions"), py::arg("target_label")
+        )
+        .def("solve", &synthesis::GameAbstractionSolver<double>::solve)
+        .def_property_readonly("player1_state_values", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.player1_state_values;})
+        .def_property_readonly("player1_choices", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.player1_choices;})
+        .def_property_readonly("player2_choices", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.player2_choices;})
         ;
 }
