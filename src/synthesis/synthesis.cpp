@@ -1,10 +1,8 @@
 #include "synthesis.h"
 
 void define_synthesis(py::module& m) {
-
     define_helpers(m);
-    define_pomdp(m);
-    
+
     bindings_pomdp(m);
     bindings_decpomdp(m);
     bindings_counterexamples(m);

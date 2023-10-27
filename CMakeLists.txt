@@ -79,8 +79,8 @@ set_optional_lib_var(POMDP)
 function(stormpy_module NAME)
     file(GLOB_RECURSE "STORM_${NAME}_SOURCES" "${CMAKE_CURRENT_SOURCE_DIR}/src/${NAME}/*.cpp")
     pybind11_add_module(${NAME} "${CMAKE_CURRENT_SOURCE_DIR}/src/mod_${NAME}.cpp" ${STORM_${NAME}_SOURCES})
-    target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${storm-counterexamples_INCLUDE_DIR} ${storm-synthesis_INCLUDE_DIR} ${storm-version-info_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/src)
-    target_link_libraries(${NAME} PRIVATE storm storm-parsers storm-counterexamples storm-synthesis storm-version-info )
+    target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${storm-counterexamples_INCLUDE_DIR} ${storm-version-info_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/src)
+    target_link_libraries(${NAME} PRIVATE storm storm-parsers storm-counterexamples storm-version-info )
     if (NOT (${NAME} STREQUAL "core"))
         set_target_properties(${NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${NAME}")
     endif()
@@ -89,8 +89,8 @@ endfunction(stormpy_module)
 function(stormpy_optional_module NAME ADDITIONAL_LIBS ADDITIONAL_INCLUDES)
     file(GLOB_RECURSE "STORM_${NAME}_SOURCES" "${CMAKE_CURRENT_SOURCE_DIR}/src/${NAME}/*.cpp")
     pybind11_add_module(${NAME} "${CMAKE_CURRENT_SOURCE_DIR}/src/mod_${NAME}.cpp" ${STORM_${NAME}_SOURCES})
-    target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${storm-counterexamples_INCLUDE_DIR}  ${storm-synthesis_INCLUDE_DIR} ${storm-version-info_INCLUDE_DIR} ${ADDITIONAL_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR}/src)
-    target_link_libraries(${NAME} PRIVATE storm storm-parsers storm-counterexamples storm-synthesis storm-version-info ${ADDITIONAL_LIBS})
+    target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${storm_INCLUDE_DIR} ${storm-parsers_INCLUDE_DIR} ${storm-counterexamples_INCLUDE_DIR} ${storm-version-info_INCLUDE_DIR} ${ADDITIONAL_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR}/src)
+    target_link_libraries(${NAME} PRIVATE storm storm-parsers storm-counterexamples storm-version-info ${ADDITIONAL_LIBS})
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/${NAME}_config.py.in ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${NAME}/_config.py @ONLY)
     set_target_properties(${NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${NAME}")
 endfunction(stormpy_optional_module)
@@ -110,11 +110,13 @@ stormpy_module(utility)
 #+
 stormpy_module(synthesis) 
 target_include_directories(synthesis
- PRIVATE
+  PRIVATE
   src/synthesis/decpomdp/madp/src/base/
   src/synthesis/decpomdp/madp/src/include/
   src/synthesis/decpomdp/madp/src/parser/
-  )
+)
+target_link_libraries(synthesis PUBLIC storm storm-pomdp)
+
 
 # Optional modules
 if(HAVE_STORM_DFT)
