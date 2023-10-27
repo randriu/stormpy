@@ -1,4 +1,4 @@
-#include "storm-synthesis/pomdp/SubPomdpBuilder.h"
+#include "SubPomdpBuilder.h"
 
 #include "storm/exceptions/InvalidArgumentException.h"
 
