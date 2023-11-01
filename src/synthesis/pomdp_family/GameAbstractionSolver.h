@@ -1,7 +1,9 @@
 #pragma once
 
-#include "storm/solver/GameSolver.h"
-#include "storm/environment/solver/GameSolverEnvironment.h"
+#include <storm/solver/GameSolver.h>
+#include <storm/environment/Environment.h>
+#include <storm/environment/solver/GameSolverEnvironment.h>
+#include <storm/environment/solver/NativeSolverEnvironment.h>
 
 namespace synthesis {
 
@@ -47,30 +49,52 @@ namespace synthesis {
     
     private:
 
-        /** Number of states of the quotient, which coincides with the number of states of Player 1. */
+        /** Number of states of the quotient. */
         uint64_t quotient_num_states;
-        /** Initial state of player 1. */
+        /** Quotient initial states, which is the initial state of Player 1. */
         uint64_t quotient_initial_state;
         /** For each state of the quotient, a list of actions associated with its rows. */
         std::vector<std::vector<uint64_t>> state_to_actions;
-        /** For each state-action pair, a list of choices that represent variants of this action in the state. */
-        std::vector<std::vector<std::vector<uint64_t>>> state_action_to_choices;
+        
 
         /** Solver environment. */
         storm::Environment env;
 
+        /*
+        - Player 1: states are states of the quotient model + a fresh target state.
+        - Player 2: states are pairs (s,a), where s is the state of the quotient and a is the action selected previously
+            by Player 1
+        */
+
+        /** Number of states of Player 1. */
+        uint64_t player1_num_states;
+        /** Fresh target state for Player 1. */
+        uint64_t player1_target_state;
+
+
+        /** Number of states of Player 2. */
+        uint64_t player2_num_states;
+        /** Fresh target state for Player 1. */
+        uint64_t player2_target_state;
+        /** For each state-action pair, the corresponding state of Player 2. */
+        std::vector<std::vector<uint64_t>> state_action_to_player2_state;
+
+        /** Number of rows in the matrix for Player 1. */
+        uint64_t player1_num_rows;
+        /** Number of rows in the matrix for Player 2. */
+        uint64_t player2_num_rows;
+        
+        
+
+        
+        
         /**
-         * Player 1 matrix. This player's states are states of the quotient, where in each state s the player has a
-         * choice of an action a, which leads to state (s,a) of Player 2.
+         * Player 1 matrix. In each state s Player 1 has a choice of an action a, which leads to state (s,a) of
+         * Player 2. In the fresh target state, Player 1 transitions to the fresh target state of Player 2.
          */
         storm::storage::SparseMatrix<storm::storage::sparse::state_type> player1_matrix;
 
-        /** For each state-action pair, the corresponding state of Player 2. */
-        std::vector<std::vector<uint64_t>> state_action_to_player2_state;
-        /**
-         * Player 2 matrix. This player's states are pairs (s,a), where s is the state of the quotient and a is the
-         * action selected previously by Player 1. In this state (s,a), Player 2 chooses the color of a to be executed.
-         */
+        /** Player 2 matrix. In state (s,a), Player 2 chooses the color of a to be executed. */
         storm::storage::SparseMatrix<ValueType> player2_matrix_full;
 
         
@@ -82,7 +106,17 @@ namespace synthesis {
         /** For each choice of Player 2, a reward to obtain: 1 for the deadlock action in target states, 0 otherwise. */
         std::vector<double> player2_row_rewards_full;
 
-        void gameSolverTest();
+        
+        storm::OptimizationDirection getOptimizationDirection(bool maximizing);
+    
+        void buildStateSpace(uint64_t quotient_num_actions);
+        void buildPlayer1Matrix();
+        void buildPlayer2Matrix(
+            storm::models::sparse::Model<ValueType> const& quotient,
+            uint64_t quotient_num_actions,
+            std::vector<uint64_t> const& choice_to_action,
+            std::string const& target_label
+        );
 
     };
 }
