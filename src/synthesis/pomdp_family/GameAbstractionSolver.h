@@ -48,6 +48,8 @@ namespace synthesis {
             bool player2_maximizing
         );
 
+        /** State values for the solution. */
+        std::vector<double> solution_state_values;
         /** Solution value of the game. */
         double solution_value;
         /** Reachable choices of the quotient that represent the game solution. */

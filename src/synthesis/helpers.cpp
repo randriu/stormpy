@@ -18,24 +18,6 @@
 namespace synthesis {
 
     template<typename ValueType>
-    void print_matrix(storm::storage::SparseMatrix<ValueType> matrix) {
-        auto const& row_group_indices = matrix.getRowGroupIndices();
-        for(uint64_t state=0; state < matrix.getRowGroupCount(); state++) {
-            std::cout << "state " << state << ": " << std::endl;
-            for(uint64_t row=row_group_indices[state]; row<row_group_indices[state+1]; row++) {
-                for(auto const &entry: matrix.getRow(row)) {
-                    std::cout << state << "-> "  << entry.getColumn() << " ["  << entry.getValue() << "];";
-                }
-                std::cout << std::endl;
-            }
-        }
-        std::cout << "-----" << std::endl;
-    }
-
-    template void print_matrix<storm::storage::sparse::state_type>(storm::storage::SparseMatrix<storm::storage::sparse::state_type> matrix);
-    template void print_matrix<double>(storm::storage::SparseMatrix<double> matrix);
-
-    template<typename ValueType>
     std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
         std::shared_ptr<storm::models::sparse::Model<ValueType>> model,
         storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> & task,
