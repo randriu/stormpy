@@ -1,30 +1,9 @@
 #include "GameAbstractionSolver.h"
 
-
+#include <queue>
 
 namespace synthesis {
         
-    
-    typedef storm::storage::sparse::state_type StateType;
-
-    template<typename ValueType>
-    void print_matrix(storm::storage::SparseMatrix<ValueType> matrix) {
-        auto const& row_group_indices = matrix.getRowGroupIndices();
-        for(uint64_t state=0; state < matrix.getRowGroupCount(); state++) {
-            std::cout << "state " << state << ": " << std::endl;
-            for(uint64_t row=row_group_indices[state]; row<row_group_indices[state+1]; row++) {
-                for(auto const &entry: matrix.getRow(row)) {
-                    std::cout << state << "-> "  << entry.getColumn() << " ["  << entry.getValue() << "];";
-                }
-                std::cout << std::endl;
-            }
-        }
-        std::cout << "-----" << std::endl;
-    }
-
-    template void print_matrix<StateType>(storm::storage::SparseMatrix<StateType> matrix);
-    template void print_matrix<double>(storm::storage::SparseMatrix<double> matrix);
-
     template<typename ValueType>
     GameAbstractionSolver<ValueType>::GameAbstractionSolver(
         storm::models::sparse::Model<ValueType> const& quotient,
@@ -43,22 +22,26 @@ namespace synthesis {
                 this->state_to_actions[state].push_back(action);
             }
         }
+        this->collectQuotientChoiceDestinations(quotient);
 
-        // setup solver environment
-        // value iteration
-        // this->env.solver().game().setMethod(storm::solver::GameMethod::ValueIteration);
-        
-        // policy iteration
-        this->env.solver().game().setMethod(storm::solver::GameMethod::PolicyIteration);
-        this->env.solver().setLinearEquationSolverType(storm::solver::EquationSolverType::Native);
-        this->env.solver().native().setMethod(storm::solver::NativeLinearEquationSolverMethod::Jacobi);
-        this->env.solver().setLinearEquationSolverPrecision(env.solver().game().getPrecision());
-
+        this->setupSolverEnvironment();
         this->solution_choices = storm::storage::BitVector(quotient.getNumberOfChoices());
 
         this->buildStateSpace(quotient_num_actions);
         this->buildPlayer1Matrix();
         this->buildPlayer2Matrix(quotient,quotient_num_actions,choice_to_action,target_label);
+    }
+
+    template<typename ValueType>
+    void GameAbstractionSolver<ValueType>::collectQuotientChoiceDestinations(
+        storm::models::sparse::Model<ValueType> const& quotient) {
+        auto quotient_num_choices = quotient.getNumberOfChoices();
+        this->quotient_choice_destinations.resize(quotient_num_choices);
+        for(uint64_t choice=0; choice<quotient_num_choices; choice++) {
+            for(auto const &entry: quotient.getTransitionMatrix().getRow(choice)) {
+                this->quotient_choice_destinations[choice].push_back(entry.getColumn());
+            }
+        }
     }
 
 
@@ -80,6 +63,22 @@ namespace synthesis {
         this->player2_target_state = this->player2_num_states++;
     }
 
+    
+    template<typename ValueType>
+    void GameAbstractionSolver<ValueType>::setupSolverEnvironment() {
+        this->env.solver().game().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-8));
+
+        // value iteration
+        // this->env.solver().game().setMethod(storm::solver::GameMethod::ValueIteration);
+        
+        // policy iteration
+        this->env.solver().game().setMethod(storm::solver::GameMethod::PolicyIteration);
+        this->env.solver().setLinearEquationSolverType(storm::solver::EquationSolverType::Native);
+        this->env.solver().native().setMethod(storm::solver::NativeLinearEquationSolverMethod::Jacobi);
+        this->env.solver().setLinearEquationSolverPrecision(env.solver().game().getPrecision());
+    }
+
+    
     template<typename ValueType>
     void GameAbstractionSolver<ValueType>::buildPlayer1Matrix() {
         storm::storage::SparseMatrixBuilder<storm::storage::sparse::state_type> player1_matrix_builder(0,0,0,false,true);
@@ -170,7 +169,6 @@ namespace synthesis {
         bool player1_maximizing,
         bool player2_maximizing
     ) {
-        // prepare the game
 
         // prepare mask for Player2's rows, don't forget about the target state
         storm::storage::BitVector player2_choices_mask(this->player2_num_rows);
@@ -181,7 +179,7 @@ namespace synthesis {
         auto player2_target_state_row = this->player2_num_rows-1;
         player2_choices_mask.set(player2_target_state_row,true);
         
-        
+        // map rows of Player2's sub-matrix to the original rows
         std::vector<uint64_t> player2_choices_sub_to_full;
         std::vector<double> player2_row_rewards;
         for(auto player2_choice: player2_choices_mask) {
@@ -196,72 +194,46 @@ namespace synthesis {
         // std::vector<uint64_t> player2_choices(this->player2_num_rows);
 
         // solve the game
-        storm::solver::GameSolverFactory<ValueType> factory;
-        auto solver = factory.create(env, this->player1_matrix, player2_matrix);
+        auto solver = storm::solver::GameSolverFactory<ValueType>().create(env, this->player1_matrix, player2_matrix);
         solver->setTrackSchedulers(true);
-        // solver->setHasUniqueSolution(true);
         auto player1_direction = this->getOptimizationDirection(player1_maximizing);
         auto player2_direction = this->getOptimizationDirection(player2_maximizing);
         solver->solveGame(this->env, player1_direction, player2_direction, player1_state_values, player2_row_rewards);
-        
-
-        auto const& player1_matrix_row_group_indices = player1_matrix.getRowGroupIndices();
-        auto const& player2_matrix_row_group_indices = player2_matrix.getRowGroupIndices();
         auto player1_choices = solver->getPlayer1SchedulerChoices();
         auto player2_choices = solver->getPlayer2SchedulerChoices();
 
-        /*
-
-        std::cout << "player 1 matrix: " << std::endl;
-        print_matrix<storm::storage::sparse::state_type>(player1_matrix);
-        std::cout << "player 2 matrix: " << std::endl;
-        print_matrix<double>(player2_matrix);
-        std::cout << "player 2 rewards: " << std::endl;
-        for(auto rew: player2_row_rewards) {
-            std::cout << rew << ",";
-        }
-        std::cout << std::endl;
-
-        std::cout << "solver has schedulers: " << solver->hasSchedulers() << std::endl;
-
-        std::cout << "game solution: " << player1_state_values[0] << std::endl;
-        for(auto value: player1_state_values) {
-            std::cout << value << ", ";
-        }
-        std::cout << std::endl;
-        
-        
-        std::cout << "player 1 choices (generated): " << std::endl;
-        for(auto choice: player1_choices) {
-            std::cout << choice << ", ";
-        }
-        std::cout << std::endl;
-        
-        std::cout << "player 2 choices (generated): " << std::endl;
-        for(auto choice: player2_choices) {
-            std::cout << choice << ", ";
-        }
-        std::cout << std::endl;
-        */
-        
         // map game result to the selection of the choices in the quotient
+        auto const& player2_matrix_row_group_indices = player2_matrix.getRowGroupIndices();
         this->solution_value = player1_state_values[this->quotient_initial_state];
+
+        // collect all reachable solution choices
         this->solution_choices.clear();
-        for(uint64_t state=0; state < this->quotient_num_states; state++) {
-            // std::cout << "state=" << state << std::endl;
+        storm::storage::BitVector state_is_encountered(this->quotient_num_states);
+        std::queue<uint64_t> unexplored_states;
+        unexplored_states.push(this->quotient_initial_state);
+        state_is_encountered.set(this->quotient_initial_state,true);
+        while(not unexplored_states.empty()) {
+            auto state = unexplored_states.front();
+            unexplored_states.pop();
+
             // get action selected by Player 1
             auto action_index = player1_choices[state];
             auto action = this->state_to_actions[state][action_index];
-            uint64_t player2_state = this->state_action_to_player2_state[state][action];
-            // std::cout << "P1 state=" << state << ", P1 plays " << action << std::endl;
-            // std::cout << "P2 state=" << player2_state << ", P2 plays " << player2_choices[player2_state] << std::endl;
+            auto player2_state = this->state_action_to_player2_state[state][action];
 
             // find the action variant selected by Player 2
             auto player2_choice_sub = player2_matrix_row_group_indices[player2_state]+player2_choices[player2_state];
             auto player2_choice_full = player2_choices_sub_to_full[player2_choice_sub];
             auto quotient_choice = this->player2_choice_to_quotient_choice[player2_choice_full];
-            // std::cout << "\t corresponds to quotient choice " << quotient_choice << std::endl;
             this->solution_choices.set(quotient_choice,true);
+
+            // add unexplored destinations of this choice
+            for(auto dst: this->quotient_choice_destinations[quotient_choice]) {
+                if(not state_is_encountered[dst]) {
+                    unexplored_states.push(dst);
+                    state_is_encountered.set(dst,true);
+                }
+            }
         }
     }
 

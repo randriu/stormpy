@@ -10,6 +10,16 @@ namespace synthesis {
     template<typename ValueType>
     class GameAbstractionSolver {
 
+        /*
+        - Player 1. States are states of the quotient model + a fresh target state. In each state s Player 1 has a
+            choice of an action a, which leads to state (s,a) of Player 2. In their fresh target state, Player 1
+            transitions to the fresh target state of Player 2.
+        - Player 2. States are pairs (s,a), where s is the state of the quotient and a is the action selected in s by
+            Player 1. In state (s,a), Player 2 chooses the color of a to be executed. In state (s,*) where s is the 
+            target state of the quotient, Player 2 receives reward 1 and executes action available in this state. In
+            their fresh target state, Player 2 loops back to the target state of Player 1.
+        */
+
     public:
         
         /**
@@ -40,12 +50,8 @@ namespace synthesis {
 
         /** Solution value of the game. */
         double solution_value;
-        /** Choices of the quotient that represent the game solution. */
+        /** Reachable choices of the quotient that represent the game solution. */
         storm::storage::BitVector solution_choices;
-        // TODO filter unreachable choices
-
-
-        
     
     private:
 
@@ -55,16 +61,11 @@ namespace synthesis {
         uint64_t quotient_initial_state;
         /** For each state of the quotient, a list of actions associated with its rows. */
         std::vector<std::vector<uint64_t>> state_to_actions;
-        
+        /** For each choice of the quotient, its destinations. */
+        std::vector<std::vector<uint64_t>> quotient_choice_destinations;
 
         /** Solver environment. */
         storm::Environment env;
-
-        /*
-        - Player 1: states are states of the quotient model + a fresh target state.
-        - Player 2: states are pairs (s,a), where s is the state of the quotient and a is the action selected previously
-            by Player 1
-        */
 
         /** Number of states of Player 1. */
         uint64_t player1_num_states;
@@ -84,17 +85,10 @@ namespace synthesis {
         /** Number of rows in the matrix for Player 2. */
         uint64_t player2_num_rows;
         
-        
-
-        
-        
-        /**
-         * Player 1 matrix. In each state s Player 1 has a choice of an action a, which leads to state (s,a) of
-         * Player 2. In the fresh target state, Player 1 transitions to the fresh target state of Player 2.
-         */
+        /** Player 1 matrix. */
         storm::storage::SparseMatrix<storm::storage::sparse::state_type> player1_matrix;
 
-        /** Player 2 matrix. In state (s,a), Player 2 chooses the color of a to be executed. */
+        /** Player 2 matrix. */
         storm::storage::SparseMatrix<ValueType> player2_matrix_full;
 
         
@@ -107,16 +101,20 @@ namespace synthesis {
         std::vector<double> player2_row_rewards_full;
 
         
-        storm::OptimizationDirection getOptimizationDirection(bool maximizing);
-    
+        void setupSolverEnvironment();
+
+        void collectQuotientChoiceDestinations(storm::models::sparse::Model<ValueType> const& quotient);
+        
         void buildStateSpace(uint64_t quotient_num_actions);
+        
         void buildPlayer1Matrix();
+        
         void buildPlayer2Matrix(
             storm::models::sparse::Model<ValueType> const& quotient,
             uint64_t quotient_num_actions,
             std::vector<uint64_t> const& choice_to_action,
-            std::string const& target_label
-        );
+            std::string const& target_label);
 
+        storm::OptimizationDirection getOptimizationDirection(bool maximizing);
     };
 }

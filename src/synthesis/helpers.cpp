@@ -15,47 +15,69 @@
 #include "storm/environment/solver/NativeSolverEnvironment.h"
 #include "storm/environment/solver/MinMaxSolverEnvironment.h"
 
+namespace synthesis {
 
-template<typename ValueType>
-std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
-    std::shared_ptr<storm::models::sparse::Model<ValueType>> model,
-    storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> & task,
-    storm::Environment const& env,
-    std::vector<ValueType> hint_values
-) {
-    storm::modelchecker::ExplicitModelCheckerHint<ValueType> hint;
-    hint.setComputeOnlyMaybeStates(false);
-    hint.setNoEndComponentsInMaybeStates(false);
-    hint.setResultHint(boost::make_optional(hint_values));
-    task.setHint(std::make_shared<storm::modelchecker::ExplicitModelCheckerHint<ValueType>>(hint));
-    return storm::api::verifyWithSparseEngine<ValueType>(env, model, task);
-}
-
-template<typename ValueType>
-std::shared_ptr<storm::modelchecker::CheckResult> getExpectedNumberOfVisits(storm::Environment const& env, std::shared_ptr<storm::models::sparse::Model<ValueType>> const& model) {
-    return storm::api::computeExpectedVisitingTimesWithSparseEngine(env, model);
-}
-
-template<typename ValueType>
-std::shared_ptr<storm::logic::Formula> transformUntilToEventually(
-    storm::logic::Formula const& formula
-) {
-    auto const& of = formula.asOperatorFormula();
-    bool is_reward = of.isRewardOperatorFormula();
-
-    auto ef = std::make_shared<storm::logic::EventuallyFormula>(
-        of.getSubformula().asUntilFormula().getRightSubformula().asSharedPointer(),
-        !is_reward ? storm::logic::FormulaContext::Probability : storm::logic::FormulaContext::Reward);
-
-    std::shared_ptr<storm::logic::Formula> modified_formula;
-    if(!is_reward) {
-        modified_formula = std::make_shared<storm::logic::ProbabilityOperatorFormula>(ef, of.getOperatorInformation());
-    } else {
-        modified_formula = std::make_shared<storm::logic::RewardOperatorFormula>(ef, of.asRewardOperatorFormula().getRewardModelName(), of.getOperatorInformation());
+    template<typename ValueType>
+    void print_matrix(storm::storage::SparseMatrix<ValueType> matrix) {
+        auto const& row_group_indices = matrix.getRowGroupIndices();
+        for(uint64_t state=0; state < matrix.getRowGroupCount(); state++) {
+            std::cout << "state " << state << ": " << std::endl;
+            for(uint64_t row=row_group_indices[state]; row<row_group_indices[state+1]; row++) {
+                for(auto const &entry: matrix.getRow(row)) {
+                    std::cout << state << "-> "  << entry.getColumn() << " ["  << entry.getValue() << "];";
+                }
+                std::cout << std::endl;
+            }
+        }
+        std::cout << "-----" << std::endl;
     }
 
-    return modified_formula;
+    template void print_matrix<storm::storage::sparse::state_type>(storm::storage::SparseMatrix<storm::storage::sparse::state_type> matrix);
+    template void print_matrix<double>(storm::storage::SparseMatrix<double> matrix);
+
+    template<typename ValueType>
+    std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
+        std::shared_ptr<storm::models::sparse::Model<ValueType>> model,
+        storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> & task,
+        storm::Environment const& env,
+        std::vector<ValueType> hint_values
+    ) {
+        storm::modelchecker::ExplicitModelCheckerHint<ValueType> hint;
+        hint.setComputeOnlyMaybeStates(false);
+        hint.setNoEndComponentsInMaybeStates(false);
+        hint.setResultHint(boost::make_optional(hint_values));
+        task.setHint(std::make_shared<storm::modelchecker::ExplicitModelCheckerHint<ValueType>>(hint));
+        return storm::api::verifyWithSparseEngine<ValueType>(env, model, task);
+    }
+
+    template<typename ValueType>
+    std::shared_ptr<storm::modelchecker::CheckResult> getExpectedNumberOfVisits(storm::Environment const& env, std::shared_ptr<storm::models::sparse::Model<ValueType>> const& model) {
+        return storm::api::computeExpectedVisitingTimesWithSparseEngine(env, model);
+    }
+
+    template<typename ValueType>
+    std::shared_ptr<storm::logic::Formula> transformUntilToEventually(
+        storm::logic::Formula const& formula
+    ) {
+        auto const& of = formula.asOperatorFormula();
+        bool is_reward = of.isRewardOperatorFormula();
+
+        auto ef = std::make_shared<storm::logic::EventuallyFormula>(
+            of.getSubformula().asUntilFormula().getRightSubformula().asSharedPointer(),
+            !is_reward ? storm::logic::FormulaContext::Probability : storm::logic::FormulaContext::Reward);
+
+        std::shared_ptr<storm::logic::Formula> modified_formula;
+        if(!is_reward) {
+            modified_formula = std::make_shared<storm::logic::ProbabilityOperatorFormula>(ef, of.getOperatorInformation());
+        } else {
+            modified_formula = std::make_shared<storm::logic::RewardOperatorFormula>(ef, of.asRewardOperatorFormula().getRewardModelName(), of.getOperatorInformation());
+        }
+
+        return modified_formula;
+    }
+    
 }
+
 
 // Define python bindings
 void define_helpers(py::module& m) {
@@ -68,10 +90,10 @@ void define_helpers(py::module& m) {
         return result;
     }, py::arg("matrix"), py::arg("vector"));
 
-    m.def("model_check_with_hint", &modelCheckWithHint<double>);
-    m.def("transform_until_to_eventually", &transformUntilToEventually<double>, py::arg("formula"));
+    m.def("model_check_with_hint", &synthesis::modelCheckWithHint<double>);
+    m.def("transform_until_to_eventually", &synthesis::transformUntilToEventually<double>, py::arg("formula"));
     
-    m.def("compute_expected_number_of_visits", &getExpectedNumberOfVisits<double>, py::arg("env"), py::arg("model"));
+    m.def("compute_expected_number_of_visits", &synthesis::getExpectedNumberOfVisits<double>, py::arg("env"), py::arg("model"));
 
     m.def("construct_selection", [] ( storm::storage::BitVector default_actions, std::vector<uint_fast64_t> selected_actions) {
         auto bv = storm::storage::BitVector(default_actions);
