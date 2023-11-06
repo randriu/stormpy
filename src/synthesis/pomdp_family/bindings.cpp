@@ -2,7 +2,8 @@
 
 #include "JaniChoices.h"
 #include "ObservationEvaluator.h"
-#include "QuotientPomdpManager.h"
+#include "ProductPomdpFsc.h"
+#include "ProductPomdpRandomizedFsc.h"
 #include "GameAbstractionSolver.h"
 
 void bindings_pomdp_family(py::module& m) {
@@ -20,14 +21,24 @@ void bindings_pomdp_family(py::module& m) {
         .def("add_observations_to_submdp", &synthesis::ObservationEvaluator<double>::addObservationsToSubMdp, py::arg("mdp"), py::arg("state_sub_to_full"))
         ;
 
-    py::class_<synthesis::QuotientPomdpManager<double>>(m, "QuotientPomdpManager")
+    py::class_<synthesis::ProductPomdpFsc<double>>(m, "ProductPomdpFsc")
         .def(
             py::init<storm::models::sparse::Model<double> const&, std::vector<uint32_t>, uint64_t, std::vector<uint64_t>>(),
             py::arg("quotient"), py::arg("state_to_obs_class"), py::arg("num_actions"), py::arg("choice_to_action")
         )
-        .def("make_product_with_fsc", &synthesis::QuotientPomdpManager<double>::makeProductWithFsc, py::arg("num_nodes"), py::arg("action_function"), py::arg("udate_function"))
-        .def_property_readonly("product", [](synthesis::QuotientPomdpManager<double>& m) {return m.product;} )
-        .def_property_readonly("product_choice_to_choice", [](synthesis::QuotientPomdpManager<double>& m) {return m.product_choice_to_choice;} )
+        .def("apply_fsc", &synthesis::ProductPomdpFsc<double>::applyFsc, py::arg("action_function"), py::arg("udate_function"))
+        .def_property_readonly("product", [](synthesis::ProductPomdpFsc<double>& m) {return m.product;} )
+        .def_property_readonly("product_choice_to_choice", [](synthesis::ProductPomdpFsc<double>& m) {return m.product_choice_to_choice;} )
+        ;
+
+    py::class_<synthesis::ProductPomdpRandomizedFsc<double>>(m, "ProductPomdpRandomizedFsc")
+        .def(
+            py::init<storm::models::sparse::Model<double> const&, std::vector<uint32_t>, uint64_t, std::vector<uint64_t>>(),
+            py::arg("quotient"), py::arg("state_to_obs_class"), py::arg("num_actions"), py::arg("choice_to_action")
+        )
+        .def("apply_fsc", &synthesis::ProductPomdpRandomizedFsc<double>::applyFsc, py::arg("action_function"), py::arg("udate_function"))
+        .def_property_readonly("product", [](synthesis::ProductPomdpRandomizedFsc<double>& m) {return m.product;} )
+        .def_property_readonly("product_choice_to_choice", [](synthesis::ProductPomdpRandomizedFsc<double>& m) {return m.product_choice_to_choice;} )
         ;
 
     py::class_<synthesis::GameAbstractionSolver<double>>(m, "GameAbstractionSolver")
