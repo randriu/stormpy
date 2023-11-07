@@ -53,6 +53,7 @@ void bindings_pomdp_family(py::module& m) {
         .def("solve", &synthesis::GameAbstractionSolver<double>::solve)
         .def_property_readonly("solution_state_values", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_values;})
         .def_property_readonly("solution_value", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_value;})
+        .def_property_readonly("solution_state_to_player1_action", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_to_player1_action;})
         .def_property_readonly("solution_choices", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_choices;})
         ;
 }

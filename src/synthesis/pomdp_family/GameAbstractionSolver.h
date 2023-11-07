@@ -52,6 +52,8 @@ namespace synthesis {
         std::vector<double> solution_state_values;
         /** Solution value of the game. */
         double solution_value;
+        /** For each state, an action selected by Player 1. */
+        std::vector<uint64_t> solution_state_to_player1_action;
         /** Reachable choices of the quotient that represent the game solution. */
         storm::storage::BitVector solution_choices;
     
@@ -59,6 +61,8 @@ namespace synthesis {
 
         /** Number of states of the quotient. */
         uint64_t quotient_num_states;
+        /** Number of actions of the quotient. */
+        uint64_t quotient_num_actions;
         /** Quotient initial states, which is the initial state of Player 1. */
         uint64_t quotient_initial_state;
         /** For each state of the quotient, a list of actions associated with its rows. */
@@ -77,7 +81,7 @@ namespace synthesis {
 
         /** Number of states of Player 2. */
         uint64_t player2_num_states;
-        /** Fresh target state for Player 1. */
+        /** Fresh target state for Player 2. */
         uint64_t player2_target_state;
         /** For each state-action pair, the corresponding state of Player 2. */
         std::vector<std::vector<uint64_t>> state_action_to_player2_state;
@@ -107,13 +111,12 @@ namespace synthesis {
 
         void collectQuotientChoiceDestinations(storm::models::sparse::Model<ValueType> const& quotient);
         
-        void buildStateSpace(uint64_t quotient_num_actions);
+        void buildStateSpace();
         
         void buildPlayer1Matrix();
         
         void buildPlayer2Matrix(
             storm::models::sparse::Model<ValueType> const& quotient,
-            uint64_t quotient_num_actions,
             std::vector<uint64_t> const& choice_to_action,
             std::string const& target_label);
 

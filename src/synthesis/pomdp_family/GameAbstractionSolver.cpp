@@ -29,7 +29,7 @@ namespace synthesis {
         std::vector<uint64_t> const& choice_to_action,
         std::vector<std::vector<uint64_t>> const& state_to_actions,
         std::string const& target_label
-    ) {
+    ) : quotient_num_actions(quotient_num_actions) {
 
         this->quotient_num_states = quotient.getNumberOfStates();
         this->quotient_initial_state = *(quotient.getInitialStates().begin());
@@ -45,9 +45,9 @@ namespace synthesis {
         this->setupSolverEnvironment();
         this->solution_choices = storm::storage::BitVector(quotient.getNumberOfChoices());
 
-        this->buildStateSpace(quotient_num_actions);
+        this->buildStateSpace();
         this->buildPlayer1Matrix();
-        this->buildPlayer2Matrix(quotient,quotient_num_actions,choice_to_action,target_label);
+        this->buildPlayer2Matrix(quotient,choice_to_action,target_label);
 
         /*std::cout << "Player 1 matrix:" << std::endl;
         synthesis::print_matrix<storm::storage::sparse::state_type>(this->player1_matrix);
@@ -69,7 +69,7 @@ namespace synthesis {
 
 
     template<typename ValueType>
-    void GameAbstractionSolver<ValueType>::buildStateSpace(uint64_t quotient_num_actions) {
+    void GameAbstractionSolver<ValueType>::buildStateSpace() {
         // build states of Player 1, including fresh target state
         this->player1_num_states = this->quotient_num_states;
         this->player1_target_state = this->player1_num_states++;
@@ -78,7 +78,7 @@ namespace synthesis {
         this->player2_num_states = 0;
         this->state_action_to_player2_state.resize(this->quotient_num_states);
         for(uint64_t state=0; state < quotient_num_states; state++) {
-            this->state_action_to_player2_state[state].resize(quotient_num_actions);
+            this->state_action_to_player2_state[state].resize(this->quotient_num_actions);
             for(auto action: this->state_to_actions[state]) {
                 this->state_action_to_player2_state[state][action] = this->player2_num_states++;
             }
@@ -124,7 +124,6 @@ namespace synthesis {
     template<typename ValueType>
     void GameAbstractionSolver<ValueType>::buildPlayer2Matrix(
         storm::models::sparse::Model<ValueType> const& quotient,
-        uint64_t quotient_num_actions,
         std::vector<uint64_t> const& choice_to_action,
         std::string const& target_label
     ) {
@@ -139,7 +138,7 @@ namespace synthesis {
         std::vector<std::vector<std::vector<uint64_t>>> state_action_to_choices(this->quotient_num_states);
         auto const& quotient_row_group_indices = quotient.getTransitionMatrix().getRowGroupIndices();
         for(uint64_t state=0; state < quotient_num_states; state++) {
-            state_action_to_choices[state].resize(quotient_num_actions);
+            state_action_to_choices[state].resize(this->quotient_num_actions);
             for(auto choice = quotient_row_group_indices[state]; choice < quotient_row_group_indices[state+1]; choice++) {
                 auto action = choice_to_action[choice];
                 state_action_to_choices[state][action].push_back(choice);
@@ -237,6 +236,7 @@ namespace synthesis {
 
         // map game result to the selection of the (reachable) choices in the quotient
         // collect all reachable solution choices
+        
         auto const& player2_matrix_row_group_indices = player2_matrix.getRowGroupIndices();
         this->solution_choices.clear();
         storm::storage::BitVector state_is_encountered(this->quotient_num_states);
@@ -264,6 +264,14 @@ namespace synthesis {
                     state_is_encountered.set(dst,true);
                 }
             }
+        }
+
+
+        this->solution_state_to_player1_action = std::vector<uint64_t>(this->quotient_num_states);
+        for(uint64_t state=0; state<this->quotient_num_states; state++) {
+            auto action_index = player1_choices[state];
+            auto action = this->state_to_actions[state][action_index];
+            this->solution_state_to_player1_action[state] = action;
         }
 
     }
