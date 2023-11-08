@@ -12,7 +12,7 @@ namespace synthesis {
     ) : quotient(quotient), state_to_obs_class(state_to_obs_class),
         num_actions(num_actions), choice_to_action(choice_to_action) {
         
-        this->state_translator = ItemTranslator<std::pair<uint64_t,uint64_t>>(this->quotient.getNumberOfStates());
+        this->state_translator = ItemKeyTranslator<std::pair<uint64_t,uint64_t>>(this->quotient.getNumberOfStates());
         this->state_action_choices.resize(this->quotient.getNumberOfStates());
         auto const& row_group_indices = this->quotient.getTransitionMatrix().getRowGroupIndices();
         for(uint64_t state = 0; state < this->quotient.getNumberOfStates(); state++) {
