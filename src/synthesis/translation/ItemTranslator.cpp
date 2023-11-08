@@ -2,53 +2,41 @@
 
 namespace synthesis {
 
-    template<typename K>
-    ItemTranslator<K>::ItemTranslator() {
+    ItemTranslator::ItemTranslator() {
         // left intentionally blank
     }
 
-    template<typename K>
-    ItemTranslator<K>::ItemTranslator(uint64_t num_items) : num_items(num_items) {
-        item_key_to_translation.resize(num_items);
+    ItemTranslator::ItemTranslator(uint64_t num_items) : num_items(num_items) {
+        item_to_translation.resize(num_items, num_items);
     }
 
-    template<typename K>
-    uint64_t ItemTranslator<K>::numTranslations() {
-        return translation_to_item_key.size();
+    uint64_t ItemTranslator::numTranslations() {
+        return translation_to_item.size();
     }
 
-    template<typename K>
-    uint64_t ItemTranslator<K>::translate(uint64_t item, K key) {
+    uint64_t ItemTranslator::translate(uint64_t item) {
+        auto translation = item_to_translation[item];
+        if(translation != num_items) {
+            return translation;
+        }
         auto new_translation = numTranslations();
-        auto const& result = item_key_to_translation[item].try_emplace(key,new_translation);
-        if(result.second) {
-            // new item
-            translation_to_item_key.push_back(std::make_pair(item,key));
-        }
-        return (*result.first).second;
+        item_to_translation[item] = new_translation;
+        translation_to_item.push_back(item);
+        return new_translation;        
     }
 
-    template<typename K>
-    std::pair<uint64_t,K> ItemTranslator<K>::retrieve(uint64_t translation) {
-        return translation_to_item_key[translation];
+    uint64_t ItemTranslator::retrieve(uint64_t translation) {
+        return translation_to_item[translation];
     }
 
-    template<typename K>
-    std::vector<uint64_t> ItemTranslator<K>::translationToItem() {
-        std::vector<uint64_t> translation_to_item(numTranslations());
-        for(uint64_t translation = 0; translation<numTranslations(); translation++) {
-            translation_to_item[translation] = translation_to_item_key[translation].first;
-        }
+    std::vector<uint64_t> const& ItemTranslator::translationToItem() {
         return translation_to_item;
     }
 
-    template<typename K>
-    void ItemTranslator<K>::clear() {
+    void ItemTranslator::clear() {
         num_items = 0;
-        item_key_to_translation.clear();
-        translation_to_item_key.clear();
+        item_to_translation.clear();
+        translation_to_item.clear();
     }
 
-    template class ItemTranslator<uint64_t>;
-    template class ItemTranslator<std::pair<uint64_t,uint64_t>>;
 }

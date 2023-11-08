@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/synthesis/translation/ItemTranslator.h"
+#include "src/synthesis/translation/ItemKeyTranslator.h"
 #include "src/synthesis/translation/componentTranslations.h"
 
 #include <storm/models/sparse/Model.h>
@@ -54,7 +54,7 @@ namespace synthesis {
         std::vector<std::vector<std::set<uint64_t>>> state_action_choices;
 
         /** For each state and memory value, the state in the product. */
-        ItemTranslator<uint64_t> state_translator;
+        ItemKeyTranslator<uint64_t> state_translator;
 
         uint64_t translateInitialState();
 
