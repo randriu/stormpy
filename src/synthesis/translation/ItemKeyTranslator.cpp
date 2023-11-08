@@ -3,12 +3,12 @@
 namespace synthesis {
 
     template<typename K>
-    ItemKeyTranslator<K>::ItemKeyTranslator() {
+    ItemKeyTranslator<K>::ItemKeyTranslator() : num_items(0) {
         // left intentionally blank
     }
 
     template<typename K>
-    ItemKeyTranslator<K>::ItemKeyTranslator(uint64_t num_items) {
+    ItemKeyTranslator<K>::ItemKeyTranslator(uint64_t num_items) : num_items(num_items)  {
         item_key_to_translation.resize(num_items);
     }
 
@@ -18,11 +18,15 @@ namespace synthesis {
     }
 
     template<typename K>
+    bool ItemKeyTranslator<K>::hasTranslation(uint64_t item, K key) {
+        return item_key_to_translation[item].find(key) != item_key_to_translation[item].end();
+    }
+
+    template<typename K>
     uint64_t ItemKeyTranslator<K>::translate(uint64_t item, K key) {
         auto new_translation = numTranslations();
         auto const& result = item_key_to_translation[item].try_emplace(key,new_translation);
         if(result.second) {
-            // new item
             translation_to_item_key.push_back(std::make_pair(item,key));
         }
         return (*result.first).second;

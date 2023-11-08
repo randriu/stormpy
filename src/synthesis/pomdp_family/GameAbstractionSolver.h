@@ -1,11 +1,12 @@
 #pragma once
 
-#include "src/synthesis/translation/ItemTranslator.h"
-
 #include <storm/solver/GameSolver.h>
 #include <storm/environment/Environment.h>
 #include <storm/environment/solver/GameSolverEnvironment.h>
 #include <storm/environment/solver/NativeSolverEnvironment.h>
+
+#include "src/synthesis/translation/ItemTranslator.h"
+#include "src/synthesis/translation/ItemKeyTranslator.h"
 
 namespace synthesis {
 
@@ -29,23 +30,21 @@ namespace synthesis {
          * @param quotient The quotient MDP. Sub-MDPs from the quotient will be used to construct sub-games.
          * @param quotient_num_action The total number of distinct actions in the quotient.
          * @param choice_to_action For each row of the quotient, the associated action.
-         * @param state_to_actions For each state of the quotient, a list of actions associated with its rows.
          * @param target_label Label of the target states.
          */
         GameAbstractionSolver(
             storm::models::sparse::Model<ValueType> const& quotient,
             uint64_t quotient_num_actions,
             std::vector<uint64_t> const& choice_to_action,
-            std::vector<std::vector<uint64_t>> const& state_to_actions,
             std::string const& target_label
         );
         
         /**
          * Solve the game induced by the sub-MDP.
-         * @param quotient_choices_mask Choices of the quotient that remained in the sub-MDP.
+         * @param quotient_choice_mask Choices of the quotient that remained in the sub-MDP.
          */
         void solve(
-            storm::storage::BitVector quotient_choices_mask,
+            storm::storage::BitVector quotient_choice_mask,
             bool player1_maximizing,
             bool player2_maximizing
         );
@@ -54,72 +53,35 @@ namespace synthesis {
         std::vector<double> solution_state_values;
         /** Solution value of the game. */
         double solution_value;
+        
         /** For each state, an action selected by Player 1. */
         std::vector<uint64_t> solution_state_to_player1_action;
+        /** All choices of the quotient that represent the game solution. */
+        storm::storage::BitVector solution_all_choices;
         /** Reachable choices of the quotient that represent the game solution. */
-        storm::storage::BitVector solution_choices;
+        storm::storage::BitVector solution_reachable_choices;
+        
+        
     
     private:
 
-        /** Number of states of the quotient. */
-        uint64_t quotient_num_states;
-        /** Number of actions of the quotient. */
+        storm::models::sparse::Model<ValueType> const& quotient;
         uint64_t quotient_num_actions;
-        /** Quotient initial states, which is the initial state of Player 1. */
-        uint64_t quotient_initial_state;
+        std::vector<uint64_t> choice_to_action;
+        
+        /** Identification of target states. */
+        storm::storage::BitVector state_is_target;
+        
         /** For each state of the quotient, a list of actions associated with its rows. */
-        std::vector<std::vector<uint64_t>> state_to_actions;
+        // std::vector<std::vector<uint64_t>> state_to_actions;
         /** For each choice of the quotient, its destinations. */
-        std::vector<std::vector<uint64_t>> quotient_choice_destinations;
+        std::vector<std::vector<uint64_t>> choice_to_destinations;
 
         /** Solver environment. */
         storm::Environment env;
 
-        /** Number of states of Player 1. */
-        uint64_t player1_num_states;
-        /** Fresh target state for Player 1. */
-        uint64_t player1_target_state;
-
-
-        /** Number of states of Player 2. */
-        uint64_t player2_num_states;
-        /** Fresh target state for Player 2. */
-        uint64_t player2_target_state;
-        /** For each state-action pair, the corresponding state of Player 2. */
-        std::vector<std::vector<uint64_t>> state_action_to_player2_state;
-
-        /** Number of rows in the matrix for Player 1. */
-        uint64_t player1_num_rows;
-        /** Number of rows in the matrix for Player 2. */
-        uint64_t player2_num_rows;
-        
-        /** Player 1 matrix. */
-        storm::storage::SparseMatrix<storm::storage::sparse::state_type> player1_matrix;
-        
-        /** Player 2 matrix. */
-        storm::storage::SparseMatrix<ValueType> player2_matrix_full;
-        /** Mapping of the choice of Player 2 to the quotient choice. */
-        std::vector<uint64_t> player2_choice_to_quotient_choice;
-        /** Mapping of the quotient choice to choice of Player 2. */
-        std::vector<uint64_t> quotient_choice_to_player2_choice;
-
-        /** For each choice of Player 2, a reward to obtain: 1 for the deadlock action in target states, 0 otherwise. */
-        std::vector<double> player2_row_rewards_full;
-
-        
         void setupSolverEnvironment();
-
-        void collectQuotientChoiceDestinations(storm::models::sparse::Model<ValueType> const& quotient);
-        
-        void buildStateSpace();
-        
-        void buildPlayer1Matrix();
-        
-        void buildPlayer2Matrix(
-            storm::models::sparse::Model<ValueType> const& quotient,
-            std::vector<uint64_t> const& choice_to_action,
-            std::string const& target_label);
-
         storm::OptimizationDirection getOptimizationDirection(bool maximizing);
+        
     };
 }

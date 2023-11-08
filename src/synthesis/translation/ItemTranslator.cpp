@@ -2,7 +2,7 @@
 
 namespace synthesis {
 
-    ItemTranslator::ItemTranslator() {
+    ItemTranslator::ItemTranslator() : num_items(0) {
         // left intentionally blank
     }
 
@@ -10,19 +10,27 @@ namespace synthesis {
         item_to_translation.resize(num_items, num_items);
     }
 
+    void ItemTranslator::clear() {
+        num_items = 0;
+        item_to_translation.clear();
+        translation_to_item.clear();
+    }
+
     uint64_t ItemTranslator::numTranslations() {
         return translation_to_item.size();
     }
 
+    bool ItemTranslator::hasTranslation(uint64_t item) {
+        return item_to_translation[item] != num_items;
+    }
+
     uint64_t ItemTranslator::translate(uint64_t item) {
-        auto translation = item_to_translation[item];
-        if(translation != num_items) {
-            return translation;
+        uint64_t *translation = &(item_to_translation[item]);
+        if(*translation == num_items) {
+            *translation = numTranslations();
+            translation_to_item.push_back(item);
         }
-        auto new_translation = numTranslations();
-        item_to_translation[item] = new_translation;
-        translation_to_item.push_back(item);
-        return new_translation;        
+        return *translation;
     }
 
     uint64_t ItemTranslator::retrieve(uint64_t translation) {
@@ -31,12 +39,6 @@ namespace synthesis {
 
     std::vector<uint64_t> const& ItemTranslator::translationToItem() {
         return translation_to_item;
-    }
-
-    void ItemTranslator::clear() {
-        num_items = 0;
-        item_to_translation.clear();
-        translation_to_item.clear();
     }
 
 }
