@@ -1,5 +1,7 @@
 #pragma once
 
+#include "src/synthesis/translation/ItemTranslator.h"
+
 #include <storm/solver/GameSolver.h>
 #include <storm/environment/Environment.h>
 #include <storm/environment/solver/GameSolverEnvironment.h>
@@ -93,11 +95,9 @@ namespace synthesis {
         
         /** Player 1 matrix. */
         storm::storage::SparseMatrix<storm::storage::sparse::state_type> player1_matrix;
-
+        
         /** Player 2 matrix. */
         storm::storage::SparseMatrix<ValueType> player2_matrix_full;
-
-        
         /** Mapping of the choice of Player 2 to the quotient choice. */
         std::vector<uint64_t> player2_choice_to_quotient_choice;
         /** Mapping of the quotient choice to choice of Player 2. */

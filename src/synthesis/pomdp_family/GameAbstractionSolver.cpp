@@ -200,8 +200,26 @@ namespace synthesis {
         }
         auto player2_target_state_row = this->player2_num_rows-1;
         player2_choices_mask.set(player2_target_state_row,true);
+        std::cout << "quotient mask has " << quotient_choices_mask.size() << std::endl;
+        std::cout << "player 2 mask has " << player2_choices_mask.size() << std::endl;
+
         
+
         auto player2_matrix = this->player2_matrix_full.filterEntries(player2_choices_mask);
+        std::cout << "player 2 matrix (full) has " << this->player2_matrix_full.getRowCount() << std::endl;
+        std::cout << "player 2 matrix has " << player2_matrix.getRowCount() << std::endl;
+
+        // map player2 choices back to quotients
+        for(auto player2_choice: player2_choices_mask) {
+            if(player2_choice == player2_target_state_row) {
+                continue;
+            }
+            auto quotient_choice = this->player2_choice_to_quotient_choice[player2_choice];
+            if(not quotient_choices_mask[quotient_choice]) {
+                std::cout << "player 2 maps to choice " << quotient_choice << " that is not in the mask" << std::endl;
+                exit(1);
+            }
+        }
 
         // solve the game
         auto solver = storm::solver::GameSolverFactory<ValueType>().create(env, this->player1_matrix, player2_matrix);
@@ -212,6 +230,14 @@ namespace synthesis {
         solver->solveGame(this->env, player1_direction, player2_direction, this->solution_state_values, this->player2_row_rewards_full);
         auto player1_choices = solver->getPlayer1SchedulerChoices();
         auto player2_choices = solver->getPlayer2SchedulerChoices();
+        for(uint64_t player2_state = 0; player2_state<player2_num_states; player2_state++) {
+            auto player2_choice = player2_matrix.getRowGroupIndices()[player2_state]+player2_choices[player2_state];
+            std::cout << "state=" << player2_state << ", player2_choice=" << player2_choice << " : ";
+            for(auto const& entry: player2_matrix.getRow(player2_choice)) {
+                std::cout << entry.getColumn() << ", ";
+            }
+            std::cout << std::endl;
+        }
 
         /*std::cout << "Player 2 row rewards: " << std::endl;
         for(auto reward: this->player2_row_rewards_full) {
@@ -238,6 +264,7 @@ namespace synthesis {
         // collect all reachable solution choices
         
         auto const& player2_matrix_row_group_indices = player2_matrix.getRowGroupIndices();
+        std::cout << player2_matrix.getRowGroupSize(1) << std::endl;
         this->solution_choices.clear();
         storm::storage::BitVector state_is_encountered(this->quotient_num_states);
         std::queue<uint64_t> unexplored_states;
@@ -253,8 +280,28 @@ namespace synthesis {
             auto player2_state = this->state_action_to_player2_state[state][action];
 
             // find the action variant selected by Player 2
+            if(player2_choices[player2_state] >= player2_matrix.getRowGroupSize(player2_state)) {
+                std::cout << "invalid choice for player 2" << std::endl;
+                exit(1);
+            }
             auto player2_choice = player2_matrix_row_group_indices[player2_state]+player2_choices[player2_state];
+            if(not player2_choices_mask[player2_choice]) {
+                std::cout << "state " << state << std::endl;
+                std::cout << "player2_state " << player2_state << std::endl;
+                std::cout << "player2_choice " << player2_choice << std::endl;
+                std::cout << "is not in the mask" << std::endl;
+                exit(1);
+            }
+
             auto quotient_choice = this->player2_choice_to_quotient_choice[player2_choice];
+            if(not quotient_choices_mask[quotient_choice]) {
+                std::cout << "state " << state << std::endl;
+                std::cout << "player2_state " << player2_state << std::endl;
+                std::cout << "player2_choice " << player2_choice << std::endl;
+                std::cout << "quotient_choice " << quotient_choice << std::endl;
+                std::cout << "quotient choice " << quotient_choice << " is not in the mask" << std::endl;
+                exit(1);
+            }
             this->solution_choices.set(quotient_choice,true);
 
             // add unexplored destinations of this choice
