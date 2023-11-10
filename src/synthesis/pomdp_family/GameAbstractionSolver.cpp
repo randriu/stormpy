@@ -78,8 +78,7 @@ namespace synthesis {
     template<typename ValueType>
     void GameAbstractionSolver<ValueType>::solve(
         storm::storage::BitVector quotient_choice_mask,
-        bool player1_maximizing,
-        bool player2_maximizing
+        bool player1_maximizing, bool player2_maximizing
     ) {
         auto quotient_num_states = this->quotient.getNumberOfStates();
         auto quotient_num_choices = this->quotient.getNumberOfChoices();
@@ -107,7 +106,6 @@ namespace synthesis {
                 auto action = choice_to_action[choice];
                 player1_state_to_actions[player1_state].insert(action);
                 auto player2_state = state_action_to_player2_state.translate(state,action);
-                // associate choice with player2_state
                 player2_state_to_choices.resize(state_action_to_player2_state.numTranslations());
                 player2_state_to_choices[player2_state].push_back(choice);
                 for(auto state_dst: this->choice_to_destinations[choice]) {

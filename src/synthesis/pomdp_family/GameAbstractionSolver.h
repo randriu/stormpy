@@ -45,8 +45,7 @@ namespace synthesis {
          */
         void solve(
             storm::storage::BitVector quotient_choice_mask,
-            bool player1_maximizing,
-            bool player2_maximizing
+            bool player1_maximizing, bool player2_maximizing
         );
 
         /** State values for the solution. */
@@ -60,9 +59,7 @@ namespace synthesis {
         storm::storage::BitVector solution_all_choices;
         /** Reachable choices of the quotient that represent the game solution. */
         storm::storage::BitVector solution_reachable_choices;
-        
-        
-    
+
     private:
 
         storm::models::sparse::Model<ValueType> const& quotient;
