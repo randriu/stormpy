@@ -16,6 +16,10 @@ namespace synthesis {
         translation_to_item.clear();
     }
 
+    void ItemTranslator::resize(uint64_t num_items) {
+        item_to_translation.resize(num_items, num_items);
+    }
+
     uint64_t ItemTranslator::numTranslations() {
         return translation_to_item.size();
     }

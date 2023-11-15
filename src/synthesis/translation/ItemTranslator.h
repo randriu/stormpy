@@ -14,6 +14,8 @@ namespace synthesis {
         ItemTranslator(uint64_t num_items);
         /** Remove all translations. */
         void clear();
+        /** Prepare to translate \p num_items items. It is assumed that translator has currently size 0. */
+        void resize(uint64_t num_items);
 
         /** Number of created translations. */
         uint64_t numTranslations();

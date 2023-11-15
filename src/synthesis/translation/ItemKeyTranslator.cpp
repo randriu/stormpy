@@ -13,6 +13,17 @@ namespace synthesis {
     }
 
     template<typename K>
+    void ItemKeyTranslator<K>::clear() {
+        item_key_to_translation.clear();
+        translation_to_item_key.clear();
+    }
+
+    template<typename K>
+    void ItemKeyTranslator<K>::resize(uint64_t num_items) {
+        item_key_to_translation.resize(num_items);
+    }
+
+    template<typename K>
     uint64_t ItemKeyTranslator<K>::numTranslations() {
         return translation_to_item_key.size();
     }
@@ -44,12 +55,6 @@ namespace synthesis {
             translation_to_item[translation] = translation_to_item_key[translation].first;
         }
         return translation_to_item;
-    }
-
-    template<typename K>
-    void ItemKeyTranslator<K>::clear() {
-        item_key_to_translation.clear();
-        translation_to_item_key.clear();
     }
 
     template class ItemKeyTranslator<uint64_t>;

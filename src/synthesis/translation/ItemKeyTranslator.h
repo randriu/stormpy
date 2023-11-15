@@ -14,7 +14,7 @@ namespace synthesis {
         ItemKeyTranslator();
         ItemKeyTranslator(uint64_t num_items);
         void clear();
-
+        void resize(uint64_t num_items);
 
         uint64_t numTranslations();
         bool hasTranslation(uint64_t item, K key);
