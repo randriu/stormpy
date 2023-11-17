@@ -65,6 +65,7 @@ namespace synthesis {
                 break;
             }
         }
+        this->product_state_to_state = this->state_translator.translationToItem();
     }
 
     template<typename ValueType>

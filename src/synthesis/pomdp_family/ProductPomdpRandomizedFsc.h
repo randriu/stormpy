@@ -36,10 +36,11 @@ namespace synthesis {
 
         /** The constructed product with an FSC. */
         std::shared_ptr<storm::models::sparse::Mdp<ValueType>> product;
-        /** For each choice of the product MDP, its original choice. */
+        /** For each choice of the product MDP, the original choice. */
         std::vector<uint64_t> product_choice_to_choice;
+        /** For each state of the product MDP, the original state-action pair. */
+        std::vector<uint64_t> product_state_to_state;
 
-        
 
     private:
         

@@ -29,6 +29,7 @@ void bindings_pomdp_family(py::module& m) {
         .def("apply_fsc", &synthesis::ProductPomdpFsc<double>::applyFsc, py::arg("action_function"), py::arg("udate_function"))
         .def_property_readonly("product", [](synthesis::ProductPomdpFsc<double>& m) {return m.product;} )
         .def_property_readonly("product_choice_to_choice", [](synthesis::ProductPomdpFsc<double>& m) {return m.product_choice_to_choice;} )
+        .def_property_readonly("product_state_to_state", [](synthesis::ProductPomdpFsc<double>& m) {return m.product_state_to_state;} )
         ;
 
     py::class_<synthesis::ProductPomdpRandomizedFsc<double>>(m, "ProductPomdpRandomizedFsc")
@@ -39,6 +40,7 @@ void bindings_pomdp_family(py::module& m) {
         .def("apply_fsc", &synthesis::ProductPomdpRandomizedFsc<double>::applyFsc, py::arg("action_function"), py::arg("udate_function"))
         .def_property_readonly("product", [](synthesis::ProductPomdpRandomizedFsc<double>& m) {return m.product;} )
         .def_property_readonly("product_choice_to_choice", [](synthesis::ProductPomdpRandomizedFsc<double>& m) {return m.product_choice_to_choice;} )
+        .def_property_readonly("product_state_to_state", [](synthesis::ProductPomdpRandomizedFsc<double>& m) {return m.product_state_to_state;} )
         ;
 
     py::class_<synthesis::GameAbstractionSolver<double>>(m, "GameAbstractionSolver")
