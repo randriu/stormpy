@@ -5,7 +5,7 @@ name: Build Test
 on:
   push:
     branches:
-      - master
+      - synthesis
   schedule:
     # run weekly
     - cron: '0 10 * * 3'
