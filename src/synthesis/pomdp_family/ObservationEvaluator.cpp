@@ -12,7 +12,6 @@ namespace synthesis {
         storm::prism::Program & prism,
         storm::models::sparse::Model<ValueType> const& model
     ) {
-        
         // substitute constanst and simplify formulas in the program
         prism = prism.substituteConstantsFormulas(true,true);
 
@@ -40,14 +39,16 @@ namespace synthesis {
 
             // collect state valuation into evaluator
             for(auto it = state_valuations.at(state).begin(); it != state_valuations.at(state).end(); ++it) {
-                auto const& var = it.getVariable();
-                STORM_LOG_THROW(it.isBoolean() or it.isInteger(), storm::exceptions::InvalidTypeException,
-                    "expected boolean or integer variable");
                 // we pass Jani variables to the evaluator, but it seems to work, perhaps it works with variable names
+                auto const& var = it.getVariable();
                 if(it.isBoolean()) {
                     evaluator.setBooleanValue(var, it.getBooleanValue());
                 } else if(it.isInteger()) {
                     evaluator.setIntegerValue(var, it.getIntegerValue());
+                } else {
+                    // this is a rational variable: we skip it in a hope that this variable encodes reward value
+                    // which is not relevant for the observation
+                    // evaluator.setRationalValue(var, it.getRationalValue());
                 }
             }
             
