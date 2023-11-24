@@ -5,6 +5,7 @@ name: Build Test
 on:
   push:
     branches:
+      - master
       - synthesis
   schedule:
     # run weekly
@@ -84,6 +85,31 @@ jobs:
         if: steps.build_stormpy.outputs.run_tests == 'true'
         run: docker exec ci bash -c "cd /opt/stormpy; python setup.py test"
 
+  deploytemp:
+    name: Test and Deploy on latest using specific Storm commit (${{ matrix.buildType.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildType:
+          - {name: "Release", dockerTag: "temp", stormTag: "stable", buildArgs: "BUILD_TYPE=Release", setupArgs: ""}
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v4
+      - name: Build stormpy from Dockerfile
+        run: docker build -t randriu/stormpy-synthesis:${{ matrix.buildType.dockerTag }} . -f fixed-storm-commit.dockerfile --build-arg build_type=${{ matrix.buildType.buildArgs }} --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
+      # - name: Run Docker
+        # run: docker run -d -it --name ci randriu/stormpy-synthesis:${{ matrix.buildType.dockerTag }}
+      # - name: Run tests
+        # run: docker exec ci bash -c "cd /opt/stormpy; python setup.py test"
+
+      - name: Login into docker
+        # Only login if using master on original repo (and not for pull requests or forks)
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/synthesis'
+        run: echo "${{ secrets.STORMPY_CI_DOCKER_PASSWORD }}" | docker login -u randriu --password-stdin
+      - name: Deploy stormpy
+        # Only deploy if using master on original repo (and not for pull requests or forks)
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/synthesis'
+        run: docker push randriu/stormpy-synthesis:${{ matrix.buildType.dockerTag }}
 
   deploy:
     name: Test and Deploy on latest (${{ matrix.buildType.name }})
