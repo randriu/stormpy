@@ -70,8 +70,6 @@ void define_helpers(py::module& m) {
     m.def("model_check_with_hint", &synthesis::modelCheckWithHint<double>);
     m.def("transform_until_to_eventually", &synthesis::transformUntilToEventually<double>, py::arg("formula"));
     
-    m.def("compute_expected_number_of_visits", &synthesis::getExpectedNumberOfVisits<double>, py::arg("env"), py::arg("model"));
-
     m.def("construct_selection", [] ( storm::storage::BitVector default_actions, std::vector<uint_fast64_t> selected_actions) {
         auto bv = storm::storage::BitVector(default_actions);
         for(auto action: selected_actions)
