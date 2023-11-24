@@ -97,7 +97,7 @@ jobs:
       - name: Login into docker
         # Only login if using master on original repo (and not for pull requests or forks)
         if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/synthesis'
-        run: echo "${{ secrets.STORMPY_CI_DOCKER_PASSWORD }}" | docker login -u randriu --password-stdin
+        run: echo '${{ secrets.STORMPY_CI_DOCKER_PASSWORD }}' | docker login -u randriu --password-stdin
       - name: Git clone
         uses: actions/checkout@v4
       - name: Build stormpy from Dockerfile
@@ -136,7 +136,7 @@ jobs:
       - name: Login into docker
         # Only login if using master on original repo (and not for pull requests or forks)
         if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/synthesis'
-        run: echo "${{ secrets.STORMPY_CI_DOCKER_PASSWORD }}" | docker login -u randriu --password-stdin
+        run: echo '${{ secrets.STORMPY_CI_DOCKER_PASSWORD }}' | docker login -u randriu --password-stdin
       - name: Deploy stormpy
         # Only deploy if using master on original repo (and not for pull requests or forks)
         if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/synthesis'
