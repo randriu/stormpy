@@ -33,11 +33,6 @@ namespace synthesis {
     }
 
     template<typename ValueType>
-    std::shared_ptr<storm::modelchecker::CheckResult> getExpectedNumberOfVisits(storm::Environment const& env, std::shared_ptr<storm::models::sparse::Model<ValueType>> const& model) {
-        return storm::api::computeExpectedVisitingTimesWithSparseEngine(env, model);
-    }
-
-    template<typename ValueType>
     std::shared_ptr<storm::logic::Formula> transformUntilToEventually(
         storm::logic::Formula const& formula
     ) {
