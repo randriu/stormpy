@@ -1,5 +1,7 @@
 #include "ProductPomdpRandomizedFsc.h"
 
+#include "src/synthesis/translation/componentTranslations.h"
+
 namespace synthesis {
 
     
@@ -15,7 +17,7 @@ namespace synthesis {
         this->state_translator = ItemKeyTranslator<std::pair<uint64_t,uint64_t>>();
         this->state_action_choices.resize(this->quotient.getNumberOfStates());
         auto const& row_group_indices = this->quotient.getTransitionMatrix().getRowGroupIndices();
-        for(uint64_t state = 0; state < this->quotient.getNumberOfStates(); state++) {
+        for(uint64_t state = 0; state < this->quotient.getNumberOfStates(); ++state) {
             this->state_action_choices[state].resize(this->num_actions);
             for (uint64_t row = row_group_indices[state]; row < row_group_indices[state+1]; row++) {
                 uint64_t action = this->choice_to_action[row];
@@ -83,7 +85,7 @@ namespace synthesis {
         this->product_choice_to_choice.clear();
         auto quotient_num_choices = this->quotient.getNumberOfChoices();
         storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, false, true, 0);
-        for(uint64_t translated_state = 0; translated_state < this->numberOfTranslatedStates(); translated_state++) {
+        for(uint64_t translated_state = 0; translated_state < this->numberOfTranslatedStates(); ++translated_state) {
             builder.newRowGroup(this->numberOfTranslatedChoices());
             auto[state,memory_action] = this->state_translator.retrieve(translated_state);
             auto[memory,action] = memory_action;
@@ -127,7 +129,7 @@ namespace synthesis {
         components.transitionMatrix = this->buildTransitionMatrix(action_function,update_function);
         storm::storage::BitVector translated_choice_mask(this->numberOfTranslatedChoices(),true);
         auto quotient_num_choices = this->quotient.getNumberOfChoices();
-        for(uint64_t translated_choice = 0; translated_choice<this->numberOfTranslatedChoices(); translated_choice++) {
+        for(uint64_t translated_choice = 0; translated_choice<this->numberOfTranslatedChoices(); ++translated_choice) {
             if(this->product_choice_to_choice[translated_choice]==quotient_num_choices) {
                 translated_choice_mask.set(translated_choice,false);
             }
@@ -137,6 +139,7 @@ namespace synthesis {
             auto new_reward_model = synthesis::translateRewardModel(reward_model.second,this->product_choice_to_choice,translated_choice_mask);
             components.rewardModels.emplace(reward_model.first, new_reward_model);
         }
+
 
         this->clearMemory();
         this->product = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));

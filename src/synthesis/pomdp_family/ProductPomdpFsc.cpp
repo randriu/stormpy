@@ -1,4 +1,5 @@
 #include "ProductPomdpFsc.h"
+#include "src/synthesis/translation/componentTranslations.h"
 
 namespace synthesis {
 

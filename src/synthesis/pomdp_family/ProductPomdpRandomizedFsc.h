@@ -1,7 +1,6 @@
 #pragma once
 
 #include "src/synthesis/translation/ItemKeyTranslator.h"
-#include "src/synthesis/translation/componentTranslations.h"
 
 #include <storm/models/sparse/Model.h>
 #include <storm/models/sparse/Mdp.h>

@@ -58,11 +58,11 @@ namespace synthesis {
         STORM_LOG_THROW(!reward_model.hasStateRewards(), storm::exceptions::NotSupportedException, "state rewards are currently not supported.");
         STORM_LOG_THROW(!reward_model.hasTransitionRewards(), storm::exceptions::NotSupportedException, "transition rewards are currently not supported.");
         
-        std::vector<ValueType> action_rewards;
+        std::vector<ValueType> action_rewards(translated_to_original_choice.size());
         for(auto translated_choice: translated_choice_mask) {
             auto choice = translated_to_original_choice[translated_choice];
             auto reward = reward_model.getStateActionReward(choice);
-            action_rewards.push_back(reward);
+            action_rewards[translated_choice] = reward;
         }
         return storm::models::sparse::StandardRewardModel<ValueType>(std::move(state_rewards), std::move(action_rewards));
     }
