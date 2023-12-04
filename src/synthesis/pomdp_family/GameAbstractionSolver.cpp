@@ -1,5 +1,7 @@
 #include "GameAbstractionSolver.h"
 
+
+
 #include <queue>
 
 namespace synthesis {
@@ -80,6 +82,10 @@ namespace synthesis {
         storm::storage::BitVector quotient_choice_mask,
         bool player1_maximizing, bool player2_maximizing
     ) {
+        if(profiling_enabled) {
+            this->timer_total.start();
+        }
+
         auto quotient_num_states = this->quotient.getNumberOfStates();
         auto quotient_num_choices = this->quotient.getNumberOfChoices();
         auto quotient_initial_state = *(this->quotient.getInitialStates().begin());
@@ -189,7 +195,13 @@ namespace synthesis {
         auto player1_direction = this->getOptimizationDirection(player1_maximizing);
         auto player2_direction = this->getOptimizationDirection(player2_maximizing);
         std::vector<double> player1_state_values(player1_num_states,0);
+        if(profiling_enabled) {
+            this->timer_game_solving.start();
+        }
         solver->solveGame(this->env, player1_direction, player2_direction, player1_state_values, player2_row_rewards);
+        if(profiling_enabled) {
+            this->timer_game_solving.stop();
+        }
         auto player1_choices = solver->getPlayer1SchedulerChoices();
         auto player2_choices = solver->getPlayer2SchedulerChoices();
 
@@ -231,8 +243,26 @@ namespace synthesis {
                 }
             }
         }
+
+        if(profiling_enabled) {
+            this->timer_total.stop();
+        }
+
         this->solution_value = this->solution_state_values[quotient_initial_state];
 
+    }
+
+
+
+    template <typename ValueType>
+    void GameAbstractionSolver<ValueType>::enableProfiling(bool enable) {
+        profiling_enabled = enable;
+    }
+ 
+    template <typename ValueType>
+    void GameAbstractionSolver<ValueType>::printProfiling() {
+        std::cout << "[s] total: " << this->timer_total << std::endl;
+        std::cout << "[s]     game solving: " << this->timer_game_solving << std::endl;
     }
 
 

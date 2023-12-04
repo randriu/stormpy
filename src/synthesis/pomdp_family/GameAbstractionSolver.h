@@ -4,6 +4,7 @@
 #include <storm/environment/Environment.h>
 #include <storm/environment/solver/GameSolverEnvironment.h>
 #include <storm/environment/solver/NativeSolverEnvironment.h>
+#include "storm/utility/Stopwatch.h"
 
 #include "src/synthesis/translation/ItemTranslator.h"
 #include "src/synthesis/translation/ItemKeyTranslator.h"
@@ -60,6 +61,10 @@ namespace synthesis {
         /** Reachable choices of the quotient that represent the game solution. */
         storm::storage::BitVector solution_reachable_choices;
 
+        // Profiling
+        void enableProfiling(bool enable);
+        void printProfiling();
+
     private:
 
         storm::models::sparse::Model<ValueType> const& quotient;
@@ -79,6 +84,11 @@ namespace synthesis {
 
         void setupSolverEnvironment();
         storm::OptimizationDirection getOptimizationDirection(bool maximizing);
+
+        // Profiling
+        bool profiling_enabled = false;
+        storm::utility::Stopwatch timer_total;
+        storm::utility::Stopwatch timer_game_solving;
         
     };
 }
