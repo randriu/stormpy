@@ -1,5 +1,6 @@
 #pragma once
 
+#include "storm/models/sparse/Model.h"
 #include <storm/solver/GameSolver.h>
 #include <storm/environment/Environment.h>
 #include <storm/environment/solver/GameSolverEnvironment.h>
@@ -10,6 +11,13 @@
 #include "src/synthesis/translation/ItemKeyTranslator.h"
 
 namespace synthesis {
+
+
+    template<typename ValueType>
+    std::shared_ptr<storm::models::sparse::Model<ValueType>> randomizeActionVariant(
+        storm::models::sparse::Model<ValueType> const& model,
+        std::vector<uint64_t> const& choice_to_action
+    );
 
     template<typename ValueType>
     class GameAbstractionSolver {

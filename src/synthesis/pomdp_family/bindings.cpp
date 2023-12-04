@@ -32,6 +32,8 @@ void bindings_pomdp_family(py::module& m) {
         .def_property_readonly("product_state_to_state", [](synthesis::ProductPomdpFsc<double>& m) {return m.product_state_to_state;} )
         ;
 
+    m.def("randomize_action_variant", &synthesis::randomizeActionVariant<double>);
+
     py::class_<synthesis::ProductPomdpRandomizedFsc<double>>(m, "ProductPomdpRandomizedFsc")
         .def(
             py::init<storm::models::sparse::Model<double> const&, std::vector<uint32_t>, uint64_t, std::vector<uint64_t>>(),

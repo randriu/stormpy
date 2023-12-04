@@ -7,6 +7,16 @@
 namespace synthesis {
         
     template<typename ValueType>
+    std::shared_ptr<storm::models::sparse::Model<ValueType>> randomizeActionVariant(
+        storm::models::sparse::Model<ValueType> const& model,
+        std::vector<uint64_t> const& choice_to_action
+    ) {
+        return NULL;
+    }
+    template std::shared_ptr<storm::models::sparse::Model<double>> randomizeActionVariant(storm::models::sparse::Model<double> const& model, std::vector<uint64_t> const& choice_to_action);
+
+
+    template<typename ValueType>
     void print_matrix(storm::storage::SparseMatrix<ValueType> matrix) {
         auto const& row_group_indices = matrix.getRowGroupIndices();
         for(uint64_t state=0; state < matrix.getRowGroupCount(); state++) {
