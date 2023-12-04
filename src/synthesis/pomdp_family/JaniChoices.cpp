@@ -65,6 +65,9 @@ namespace synthesis {
         storm::storage::sparse::ModelComponents<ValueType> components;
         components.transitionMatrix = model.getTransitionMatrix();
         components.stateLabeling = model.getStateLabeling();
+        if(model.hasStateValuations()) {
+            components.stateValuations = model.getStateValuations();
+        }
         storm::models::sparse::ChoiceLabeling choice_labeling = reconstructChoiceLabelsFromJani(model);
         makeChoiceLabelingCanonic(model,choice_labeling,"empty_label");
         components.choiceLabeling = choice_labeling;
