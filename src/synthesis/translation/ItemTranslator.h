@@ -18,16 +18,16 @@ namespace synthesis {
         void resize(uint64_t num_items);
 
         /** Number of created translations. */
-        uint64_t numTranslations();
+        uint64_t numTranslations() const;
         /** Check if the item has a defined translation. */
-        bool hasTranslation(uint64_t item);
+        bool hasTranslation(uint64_t item) const;
         /** Translate an item. If the item does not have a translation, create and remember a new one. */
         uint64_t translate(uint64_t item);
         /** Retrieve the item that has the given translation. */
-        uint64_t retrieve(uint64_t translation);
+        uint64_t retrieve(uint64_t translation) const;
 
         /** Returns reverse mapping of translation to item. */
-        std::vector<uint64_t> const& translationToItem();
+        std::vector<uint64_t> const& translationToItem() const;
 
     private:
 

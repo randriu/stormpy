@@ -20,11 +20,11 @@ namespace synthesis {
         item_to_translation.resize(num_items, num_items);
     }
 
-    uint64_t ItemTranslator::numTranslations() {
+    uint64_t ItemTranslator::numTranslations() const {
         return translation_to_item.size();
     }
 
-    bool ItemTranslator::hasTranslation(uint64_t item) {
+    bool ItemTranslator::hasTranslation(uint64_t item) const {
         return item_to_translation[item] != num_items;
     }
 
@@ -37,11 +37,11 @@ namespace synthesis {
         return *translation;
     }
 
-    uint64_t ItemTranslator::retrieve(uint64_t translation) {
+    uint64_t ItemTranslator::retrieve(uint64_t translation) const {
         return translation_to_item[translation];
     }
 
-    std::vector<uint64_t> const& ItemTranslator::translationToItem() {
+    std::vector<uint64_t> const& ItemTranslator::translationToItem() const {
         return translation_to_item;
     }
 

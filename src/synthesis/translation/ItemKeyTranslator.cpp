@@ -24,12 +24,12 @@ namespace synthesis {
     }
 
     template<typename K>
-    uint64_t ItemKeyTranslator<K>::numTranslations() {
+    uint64_t ItemKeyTranslator<K>::numTranslations() const {
         return translation_to_item_key.size();
     }
 
     template<typename K>
-    bool ItemKeyTranslator<K>::hasTranslation(uint64_t item, K key) {
+    bool ItemKeyTranslator<K>::hasTranslation(uint64_t item, K key) const {
         return item_key_to_translation[item].find(key) != item_key_to_translation[item].end();
     }
 
@@ -44,12 +44,17 @@ namespace synthesis {
     }
 
     template<typename K>
-    std::pair<uint64_t,K> ItemKeyTranslator<K>::retrieve(uint64_t translation) {
+    std::pair<uint64_t,K> ItemKeyTranslator<K>::retrieve(uint64_t translation) const {
         return translation_to_item_key[translation];
     }
 
     template<typename K>
-    std::vector<uint64_t> ItemKeyTranslator<K>::translationToItem() {
+    std::vector<std::pair<uint64_t,K>> const& ItemKeyTranslator<K>::translationToItemKey() const {
+        return translation_to_item_key;
+    }
+
+    template<typename K>
+    std::vector<uint64_t> ItemKeyTranslator<K>::translationToItem() const {
         std::vector<uint64_t> translation_to_item(numTranslations());
         for(uint64_t translation = 0; translation<numTranslations(); translation++) {
             translation_to_item[translation] = translation_to_item_key[translation].first;
