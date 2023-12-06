@@ -74,7 +74,9 @@ namespace synthesis {
                 break;
             }
         }
+
         this->product_state_to_state = this->state_translator.translationToItem();
+        this->product_state_to_state_memory_action = this->state_translator.translationToItemKey();
     }
 
     template<typename ValueType>
@@ -139,7 +141,6 @@ namespace synthesis {
             auto new_reward_model = synthesis::translateRewardModel(reward_model.second,this->product_choice_to_choice,translated_choice_mask);
             components.rewardModels.emplace(reward_model.first, new_reward_model);
         }
-
 
         this->clearMemory();
         this->product = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));

@@ -55,7 +55,6 @@ namespace synthesis {
 
         /** For each state and memory value, the state in the product. */
         ItemKeyTranslator<uint64_t> state_translator;
-
         uint64_t translateInitialState();
 
         uint64_t numberOfTranslatedStates();  

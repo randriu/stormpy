@@ -43,6 +43,7 @@ void bindings_pomdp_family(py::module& m) {
         .def_property_readonly("product", [](synthesis::ProductPomdpRandomizedFsc<double>& m) {return m.product;} )
         .def_property_readonly("product_choice_to_choice", [](synthesis::ProductPomdpRandomizedFsc<double>& m) {return m.product_choice_to_choice;} )
         .def_property_readonly("product_state_to_state", [](synthesis::ProductPomdpRandomizedFsc<double>& m) {return m.product_state_to_state;} )
+        .def_property_readonly("product_state_to_state_memory_action", [](synthesis::ProductPomdpRandomizedFsc<double>& m) {return m.product_state_to_state_memory_action;} )
         ;
 
     py::class_<synthesis::GameAbstractionSolver<double>>(m, "GameAbstractionSolver")

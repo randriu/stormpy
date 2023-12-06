@@ -37,8 +37,10 @@ namespace synthesis {
         std::shared_ptr<storm::models::sparse::Mdp<ValueType>> product;
         /** For each choice of the product MDP, the original choice. */
         std::vector<uint64_t> product_choice_to_choice;
-        /** For each state of the product MDP, the original state-action pair. */
+        /** For each state of the product MDP, the original state. */
         std::vector<uint64_t> product_state_to_state;
+        /** For each state of the product MDP, the correponding state-memory-action triple. */
+        std::vector<std::pair<uint64_t,std::pair<uint64_t,uint64_t>>> product_state_to_state_memory_action;
 
 
     private:
