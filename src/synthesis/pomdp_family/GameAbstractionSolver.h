@@ -1,6 +1,7 @@
 #pragma once
 
 #include "storm/models/sparse/Model.h"
+#include "storm/models/sparse/Mdp.h"
 #include <storm/solver/GameSolver.h>
 #include <storm/environment/Environment.h>
 #include <storm/environment/solver/GameSolverEnvironment.h>
@@ -13,10 +14,13 @@
 namespace synthesis {
 
 
+    /**
+     * Given an MDP having multiple variants of actions, create an MDP in which this variant selection is randomized.
+     */
     template<typename ValueType>
-    std::shared_ptr<storm::models::sparse::Model<ValueType>> randomizeActionVariant(
+    std::pair<std::shared_ptr<storm::models::sparse::Mdp<ValueType>>,std::vector<uint64_t>> randomizeActionVariant(
         storm::models::sparse::Model<ValueType> const& model,
-        std::vector<uint64_t> const& choice_to_action
+        std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices
     );
 
     template<typename ValueType>

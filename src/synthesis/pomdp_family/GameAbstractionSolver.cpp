@@ -7,13 +7,74 @@
 namespace synthesis {
         
     template<typename ValueType>
-    std::shared_ptr<storm::models::sparse::Model<ValueType>> randomizeActionVariant(
+    std::pair<std::shared_ptr<storm::models::sparse::Mdp<ValueType>>,std::vector<uint64_t>> randomizeActionVariant(
         storm::models::sparse::Model<ValueType> const& model,
-        std::vector<uint64_t> const& choice_to_action
+        std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices
     ) {
-        return NULL;
+        storm::storage::sparse::ModelComponents<ValueType> components;
+
+        // copy state labeling
+        storm::models::sparse::StateLabeling state_labeling(model.getNumberOfStates());
+        for (auto const& label : model.getStateLabeling().getLabels()) {
+            state_labeling.addLabel(label, storm::storage::BitVector(model.getStates(label)));
+        }
+        components.stateLabeling = state_labeling;
+        
+        // build transition matrix and reward models
+        storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, false, true, 0);
+        std::map<std::string,std::vector<ValueType>> reward_vectors;
+        for(auto const& reward_model : model.getRewardModels()) {
+            reward_vectors.emplace(reward_model.first, std::vector<ValueType>());
+        }
+
+        uint64_t num_rows = 0;
+        std::vector<uint64_t> choice_to_action;
+        auto num_actions = state_action_choices[0].size();
+        for(uint64_t state=0; state<model.getNumberOfStates(); ++state) {
+            builder.newRowGroup(num_rows);
+            for(uint64_t action = 0; action<num_actions; ++action) {
+                auto & choices = state_action_choices[state][action];
+                if(choices.empty()) {
+                    continue;
+                }
+
+                // new choice
+                choice_to_action.push_back(action);
+
+                // handle transition matrix
+                auto num_choices = choices.size();
+                std::map<uint64_t,ValueType> dst_prob;
+                for(auto choice: choices) {
+                    for(auto const &entry: model.getTransitionMatrix().getRow(choice)) {
+                        dst_prob[entry.getColumn()] += entry.getValue() / num_choices;
+                    }
+                }
+                for(auto const& [dst,prob] : dst_prob) {
+                    builder.addNextValue(num_rows,dst,prob);
+                }
+                num_rows++;
+
+                // handle reward models
+                for(auto const& reward_model : model.getRewardModels()) {
+                    ValueType reward_value = 0;
+                    for(auto choice: choices) {
+                        reward_value += reward_model.second.getStateActionReward(choice) / num_choices;
+                    }
+                    reward_vectors[reward_model.first].push_back(reward_value);
+                }
+            }
+        }
+        components.transitionMatrix = builder.build();
+
+        for(auto const& [name,choice_rewards]: reward_vectors) {
+            std::optional<std::vector<ValueType>> state_rewards;
+            components.rewardModels.emplace(name, storm::models::sparse::StandardRewardModel<ValueType>(std::move(state_rewards), std::move(choice_rewards)));
+        }
+
+        auto randomized_model = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
+        return std::make_pair(randomized_model,choice_to_action);
     }
-    template std::shared_ptr<storm::models::sparse::Model<double>> randomizeActionVariant(storm::models::sparse::Model<double> const& model, std::vector<uint64_t> const& choice_to_action);
+    template std::pair<std::shared_ptr<storm::models::sparse::Mdp<double>>,std::vector<uint64_t>> randomizeActionVariant(storm::models::sparse::Model<double> const& model, std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices);
 
 
     template<typename ValueType>
@@ -68,7 +129,7 @@ namespace synthesis {
     
     template<typename ValueType>
     void GameAbstractionSolver<ValueType>::setupSolverEnvironment() {
-        this->env.solver().game().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-8));
+        this->env.solver().game().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-4));
 
         // value iteration
         // this->env.solver().game().setMethod(storm::solver::GameMethod::ValueIteration);
