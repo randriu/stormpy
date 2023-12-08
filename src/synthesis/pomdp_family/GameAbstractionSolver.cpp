@@ -122,8 +122,7 @@ namespace synthesis {
 
         this->solution_state_values = std::vector<double>(quotient_num_states,0);
         this->solution_state_to_player1_action = std::vector<uint64_t>(quotient_num_states,quotient_num_actions);
-        this->solution_all_choices = storm::storage::BitVector(quotient_num_choices,false);
-        this->solution_reachable_choices = storm::storage::BitVector(quotient_num_choices,false);
+        this->solution_state_to_quotient_choice = std::vector<uint64_t>(quotient_num_states,quotient_num_choices);
     }
 
     
@@ -279,8 +278,7 @@ namespace synthesis {
         // collect all the results
         std::fill(this->solution_state_values.begin(),this->solution_state_values.end(),0);
         std::fill(this->solution_state_to_player1_action.begin(),this->solution_state_to_player1_action.end(),quotient_num_actions);
-        this->solution_all_choices.clear();
-        this->solution_reachable_choices.clear();
+        std::fill(this->solution_state_to_quotient_choice.begin(),this->solution_state_to_quotient_choice.end(),quotient_num_choices);
 
         auto const& player1_matrix_row_group_indices = player1_matrix.getRowGroupIndices();
         auto const& player2_matrix_row_group_indices = player2_matrix.getRowGroupIndices();
@@ -295,24 +293,16 @@ namespace synthesis {
             this->solution_state_to_player1_action[state] = player1_action;
 
             if(this->state_is_target[state]) {
-                // if the state is target, there is exactly one action that is performed
                 auto state_only_choice = quotient_row_group_indices[state];
-                this->solution_all_choices.set(state_only_choice,true);
-                this->solution_reachable_choices.set(state_only_choice,true);
+                this->solution_state_to_quotient_choice[state] = state_only_choice;
                 continue;
             }
 
-            // scan through all actions available to Player 1
-            for(auto action: player1_state_to_actions[player1_state]) {
-                // get action selected by Player 2
-                auto player2_state = state_action_to_player2_state.translate(state,action);
-                auto player2_choice = player2_matrix_row_group_indices[player2_state]+player2_choices[player2_state];
-                auto quotient_choice = player2_choice_to_quotient_choice[player2_choice];
-                this->solution_all_choices.set(quotient_choice,true);
-                if(action == player1_action) {
-                    this->solution_reachable_choices.set(quotient_choice,true);
-                }
-            }
+            // get action selected by Player 2 and map it to the quotient choice
+            auto player2_state = state_action_to_player2_state.translate(state,player1_action);
+            auto player2_choice = player2_matrix_row_group_indices[player2_state]+player2_choices[player2_state];
+            auto quotient_choice = player2_choice_to_quotient_choice[player2_choice];
+            this->solution_state_to_quotient_choice[state] = quotient_choice;
         }
 
         if(profiling_enabled) {

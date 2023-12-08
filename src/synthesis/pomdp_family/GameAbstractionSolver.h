@@ -68,10 +68,8 @@ namespace synthesis {
         
         /** For each state, an action selected by Player 1. */
         std::vector<uint64_t> solution_state_to_player1_action;
-        /** All choices of the quotient that represent the game solution. */
-        storm::storage::BitVector solution_all_choices;
-        /** Reachable choices of the quotient that represent the game solution. */
-        storm::storage::BitVector solution_reachable_choices;
+        /** For each state, a choice selected by Player1&Player2. */
+        std::vector<uint64_t> solution_state_to_quotient_choice;
 
         // Profiling
         void enableProfiling(bool enable);
