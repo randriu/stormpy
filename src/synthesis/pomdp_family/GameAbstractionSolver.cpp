@@ -100,7 +100,8 @@ namespace synthesis {
         storm::models::sparse::Model<ValueType> const& quotient,
         uint64_t quotient_num_actions,
         std::vector<uint64_t> const& choice_to_action,
-        std::string const& target_label
+        std::string const& target_label,
+        double precision
     ) : quotient(quotient), quotient_num_actions(quotient_num_actions), choice_to_action(choice_to_action) {
 
         auto quotient_num_states = quotient.getNumberOfStates();
@@ -112,7 +113,7 @@ namespace synthesis {
                 this->choice_to_destinations[choice].push_back(entry.getColumn());
             }
         }
-        this->setupSolverEnvironment();
+        this->setupSolverEnvironment(precision);
 
         // identify target states
         this->state_is_target = storm::storage::BitVector(quotient_num_states,false);
@@ -127,8 +128,8 @@ namespace synthesis {
 
     
     template<typename ValueType>
-    void GameAbstractionSolver<ValueType>::setupSolverEnvironment() {
-        this->env.solver().game().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(1e-4));
+    void GameAbstractionSolver<ValueType>::setupSolverEnvironment(double precision) {
+        this->env.solver().game().setPrecision(storm::utility::convertNumber<storm::RationalNumber>(precision));
 
         // value iteration
         // this->env.solver().game().setMethod(storm::solver::GameMethod::ValueIteration);

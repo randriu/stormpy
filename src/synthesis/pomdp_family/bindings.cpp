@@ -48,8 +48,8 @@ void bindings_pomdp_family(py::module& m) {
 
     py::class_<synthesis::GameAbstractionSolver<double>>(m, "GameAbstractionSolver")
         .def(
-            py::init<storm::models::sparse::Model<double> const&, uint64_t, std::vector<uint64_t> const&, std::string const&>(),
-            py::arg("quotient"), py::arg("quoitent_num_actions"), py::arg("choice_to_action"), py::arg("target_label")
+            py::init<storm::models::sparse::Model<double> const&, uint64_t, std::vector<uint64_t> const&, std::string const&, double>(),
+            py::arg("quotient"), py::arg("quoitent_num_actions"), py::arg("choice_to_action"), py::arg("target_label"), py::arg("precision")
         )
         .def("solve", &synthesis::GameAbstractionSolver<double>::solve)
         .def_property_readonly("solution_state_values", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_values;})

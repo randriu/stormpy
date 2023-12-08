@@ -44,12 +44,14 @@ namespace synthesis {
          * @param quotient_num_action The total number of distinct actions in the quotient.
          * @param choice_to_action For each row of the quotient, the associated action.
          * @param target_label Label of the target states.
+         * @param precision Game solving precision.
          */
         GameAbstractionSolver(
             storm::models::sparse::Model<ValueType> const& quotient,
             uint64_t quotient_num_actions,
             std::vector<uint64_t> const& choice_to_action,
-            std::string const& target_label
+            std::string const& target_label,
+            double precision
         );
         
         /**
@@ -92,7 +94,7 @@ namespace synthesis {
         /** Solver environment. */
         storm::Environment env;
 
-        void setupSolverEnvironment();
+        void setupSolverEnvironment(double precisions);
         storm::OptimizationDirection getOptimizationDirection(bool maximizing);
 
         // Profiling
