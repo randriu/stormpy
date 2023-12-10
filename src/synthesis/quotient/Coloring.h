@@ -11,6 +11,7 @@ namespace synthesis {
 
 using BitVector = storm::storage::BitVector;
 
+
 class Coloring {
 public:
     
@@ -50,6 +51,6 @@ protected:
     BitVector uncolored_choices;
     /** Choices labeled by some hole. */
     BitVector colored_choices;
-}; 
+};
 
 }

@@ -4,6 +4,7 @@
 
 namespace synthesis {
 
+
 Coloring::Coloring(
     Family const& family, std::vector<uint64_t> const& row_groups,
     std::vector<std::vector<std::pair<uint32_t,uint32_t>>> choice_to_assignment
@@ -98,7 +99,5 @@ std::vector<std::vector<uint32_t>> Coloring::collectHoleOptions(BitVector const&
     }
     return hole_options;
 }
-
-
 
 }
