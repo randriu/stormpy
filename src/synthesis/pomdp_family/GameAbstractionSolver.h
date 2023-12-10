@@ -1,12 +1,12 @@
 #pragma once
 
-#include "storm/models/sparse/Model.h"
-#include "storm/models/sparse/Mdp.h"
+#include <storm/models/sparse/Model.h>
+#include <storm/models/sparse/Mdp.h>
 #include <storm/solver/GameSolver.h>
 #include <storm/environment/Environment.h>
 #include <storm/environment/solver/GameSolverEnvironment.h>
 #include <storm/environment/solver/NativeSolverEnvironment.h>
-#include "storm/utility/Stopwatch.h"
+#include <storm/utility/Stopwatch.h>
 
 #include "src/synthesis/translation/ItemTranslator.h"
 #include "src/synthesis/translation/ItemKeyTranslator.h"
