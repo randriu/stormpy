@@ -13,15 +13,15 @@ void bindings_coloring(py::module& m) {
         
         .def("holeOptions", &synthesis::Family::holeOptions)
         .def("holeOptionsMask", &synthesis::Family::holeOptionsMask)
-        .def("holeSetOptions", py::overload_cast<uint32_t, std::vector<uint32_t> const&>(&synthesis::Family::holeSetOptions))
-        .def("holeSetOptions", py::overload_cast<uint32_t, storm::storage::BitVector const&>(&synthesis::Family::holeSetOptions))
+        .def("holeSetOptions", py::overload_cast<uint64_t, std::vector<uint64_t> const&>(&synthesis::Family::holeSetOptions))
+        .def("holeSetOptions", py::overload_cast<uint64_t, storm::storage::BitVector const&>(&synthesis::Family::holeSetOptions))
         .def("holeNumOptions", &synthesis::Family::holeNumOptions)
         .def("holeNumOptionsTotal", &synthesis::Family::holeNumOptionsTotal)
         .def("holeContains", &synthesis::Family::holeContains)
         ;
 
     py::class_<synthesis::Coloring>(m, "Coloring")
-        .def(py::init<synthesis::Family const&, std::vector<uint64_t> const&, std::vector<std::vector<std::pair<uint32_t,uint32_t>>> >(), "Constructor.")
+        .def(py::init<synthesis::Family const&, std::vector<uint64_t> const&, std::vector<std::vector<std::pair<uint64_t,uint64_t>>> >(), "Constructor.")
         .def("getChoiceToAssignment", &synthesis::Coloring::getChoiceToAssignment)
         .def("getStateToHoles", &synthesis::Coloring::getStateToHoles)
         .def("getUncoloredChoices", &synthesis::Coloring::getUncoloredChoices)

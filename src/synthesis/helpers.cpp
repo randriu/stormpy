@@ -15,9 +15,11 @@
 #include <storm/environment/solver/NativeSolverEnvironment.h>
 #include <storm/environment/solver/MinMaxSolverEnvironment.h>
 
+#include <queue>
+
 namespace synthesis {
 
-template<typename ValueType>
+/*template<typename ValueType>
 std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
     std::shared_ptr<storm::models::sparse::Model<ValueType>> model,
     storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> & task,
@@ -30,7 +32,7 @@ std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
     hint.setResultHint(boost::make_optional(hint_values));
     task.setHint(std::make_shared<storm::modelchecker::ExplicitModelCheckerHint<ValueType>>(hint));
     return storm::api::verifyWithSparseEngine<ValueType>(env, model, task);
-}
+}*/
 
 template<typename ValueType>
 std::shared_ptr<storm::logic::Formula> transformUntilToEventually(
@@ -53,10 +55,9 @@ std::shared_ptr<storm::logic::Formula> transformUntilToEventually(
     return modified_formula;
 }
 
-
 template<typename ValueType>
 std::vector<uint64_t> schedulerToStateToGlobalChoice(
-    storm::storage::Scheduler<ValueType> scheduler, storm::models::sparse::Mdp<ValueType> const& sub_mdp,
+    storm::storage::Scheduler<ValueType> const& scheduler, storm::models::sparse::Mdp<ValueType> const& sub_mdp,
     std::vector<uint64_t> choice_to_global_choice
 ) {
     uint64_t num_states = sub_mdp.getNumberOfStates();
@@ -70,7 +71,7 @@ std::vector<uint64_t> schedulerToStateToGlobalChoice(
     return state_to_choice;
 }
 
-template<typename ValueType>
+/*template<typename ValueType>
 std::vector<uint64_t> schedulerToGlobalScheduler(
     storm::models::sparse::Mdp<ValueType> const& sub_mdp,
     std::vector<uint64_t> choice_to_global_choice,
@@ -88,18 +89,18 @@ std::vector<uint64_t> schedulerToGlobalScheduler(
     }
     return state_to_choice;
 }
+*/
 
-
-std::map<uint32_t,double> computeInconsistentHoleVariance(
+std::map<uint64_t,double> computeInconsistentHoleVariance(
     Family const& family,
-    std::vector<uint64_t> row_groups, std::vector<uint64_t> choice_to_global_choice, std::vector<double> choice_to_value,
-    Coloring const& coloring, std::map<uint64_t,std::vector<uint32_t>> hole_to_inconsistent_options,
-    std::vector<double> state_to_expected_visits
+    std::vector<uint64_t> const& row_groups, std::vector<uint64_t> const& choice_to_global_choice, std::vector<double> const& choice_to_value,
+    Coloring const& coloring, std::map<uint64_t,std::vector<uint64_t>> const& hole_to_inconsistent_options,
+    std::vector<double> const& state_to_expected_visits
 ) {
 
     auto num_holes = family.numHoles();
     std::vector<BitVector> hole_to_inconsistent_options_mask(num_holes);
-    for(uint32_t hole=0; hole<num_holes; ++hole) {
+    for(uint64_t hole=0; hole<num_holes; ++hole) {
         hole_to_inconsistent_options_mask[hole] = BitVector(family.holeNumOptionsTotal(hole));
     }
     BitVector inconsistent_holes(num_holes);
@@ -156,7 +157,7 @@ std::map<uint32_t,double> computeInconsistentHoleVariance(
         std::fill(hole_set.begin(), hole_set.end(), false);
     }
 
-    std::map<uint32_t,double> inconsistent_hole_variance;
+    std::map<uint64_t,double> inconsistent_hole_variance;
     for(auto hole: inconsistent_holes) {
         inconsistent_hole_variance[hole] = hole_difference_avg[hole];
     }
@@ -164,8 +165,99 @@ std::map<uint32_t,double> computeInconsistentHoleVariance(
     return inconsistent_hole_variance;
 }
 
+
+/*storm::storage::BitVector keepReachableChoices(
+    storm::storage::BitVector enabled_choices, uint64_t initial_state,
+    std::vector<uint64_t> const& row_groups, std::vector<std::vector<uint64_t>> const& choice_destinations
+) {
+
+    uint64_t num_states = row_groups.size()-1;
+    uint64_t num_choices = enabled_choices.size();
+
+    storm::storage::BitVector reachable_choices(num_choices,false);
+    storm::storage::BitVector state_visited(num_states,false);
+
+    std::queue<uint64_t> state_queue;
+    state_visited.set(initial_state,true);
+    state_queue.push(initial_state);
+    while(not state_queue.empty()) {
+        auto state = state_queue.front();
+        state_queue.pop();
+        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+            if(not enabled_choices[choice]) {
+                continue;
+            }
+            reachable_choices.set(choice,true);
+            for(auto dst: choice_destinations[choice]) {
+                if(not state_visited[dst]) {
+                    state_visited.set(dst,true);
+                    state_queue.push(dst);
+                }
+            }
+        }
+    }
+    return reachable_choices;
+}*/
+
+
+// RA: even I don't understand why this needs to be optimized, but it does
+storm::storage::BitVector policyToChoicesForFamily(
+    std::vector<uint64_t> const& policy_choices,
+    storm::storage::BitVector const& family_choices
+) {
+    storm::storage::BitVector choices(family_choices.size(),false);
+    for(auto choice : policy_choices) {
+        choices.set(choice,true);
+    }
+    return choices & family_choices;
 }
 
+/*std::pair<std::vector<uint64_t>,storm::storage::BitVector> fixPolicyForFamily(
+    std::vector<uint64_t> const& policy, uint64_t invalid_action,
+    storm::storage::BitVector const& family_choices,
+    uint64_t initial_state, uint64_t num_choices,
+    std::vector<std::vector<uint64_t>> const& state_to_actions,
+    std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices,
+    std::vector<std::vector<uint64_t>> const& choice_destinations
+) {
+
+    uint64_t num_states = state_to_actions.size();
+
+    std::vector<uint64_t> policy_fixed(num_states,invalid_action);
+    storm::storage::BitVector choice_mask(num_choices,false);
+
+    storm::storage::BitVector state_visited(num_states,false);
+    state_visited.set(initial_state,true);
+
+    std::queue<uint64_t> state_queue;
+    state_queue.push(initial_state);
+    while(not state_queue.empty()) {
+        auto state = state_queue.front();
+        state_queue.pop();
+        // get action executed in the state
+        auto action = policy[state];
+        if(action == invalid_action) {
+            action = state_to_actions[state][0];
+        }
+        policy_fixed[state] = action;
+        // expand through the choices that correspond to this action
+        for(auto choice: state_action_choices[state][action]) {
+            if(not family_choices[choice]) {
+                continue;
+            }
+            choice_mask.set(choice,true);
+            for(auto dst: choice_destinations[choice]) {
+                if(not state_visited[dst]) {
+                    state_visited.set(dst,true);
+                    state_queue.push(dst);
+                }
+            }   
+        }
+    }
+    return std::make_pair(policy_fixed,choice_mask);
+}*/
+
+}
 
 // Define python bindings
 void define_helpers(py::module& m) {
@@ -187,12 +279,13 @@ void define_helpers(py::module& m) {
         return result;
     }, py::arg("matrix"), py::arg("vector"));
 
-    m.def("model_check_with_hint", &synthesis::modelCheckWithHint<double>);
     m.def("verify_mdp", &synthesis::verifyMdp<double>);
     
     m.def("schedulerToStateToGlobalChoice", &synthesis::schedulerToStateToGlobalChoice<double>);
-    m.def("schedulerToGlobalScheduler", &synthesis::schedulerToGlobalScheduler<double>);
     m.def("computeInconsistentHoleVariance", &synthesis::computeInconsistentHoleVariance);
+    
+    // m.def("keepReachableChoices", &synthesis::keepReachableChoices);
+    m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);
 
 }
 

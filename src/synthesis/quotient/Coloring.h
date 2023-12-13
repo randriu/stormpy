@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <memory>
 
 namespace synthesis {
 
@@ -17,25 +18,27 @@ public:
     
     Coloring(
         Family const& family, std::vector<uint64_t> const& row_groups,
-        std::vector<std::vector<std::pair<uint32_t,uint32_t>>> choice_to_assignment
+        std::vector<std::vector<std::pair<uint64_t,uint64_t>>> choice_to_assignment
     );
 
-    std::vector<std::vector<std::pair<uint32_t,uint32_t>>> const& getChoiceToAssignment() const;
+    /** Get choice-to-assignment mapping. */
+    std::vector<std::vector<std::pair<uint64_t,uint64_t>>> const& getChoiceToAssignment() const;
+    /** Get a mapping from states to holes involved in its choices. */
     std::vector<BitVector> const& getStateToHoles() const;
+    /** Get mask of uncolored choices. */
     BitVector const& getUncoloredChoices() const;
-
+    
+    /** Get a mask of choices compatible with the family. */
     BitVector selectCompatibleChoices(Family const& subfamily) const;
-    
-    std::vector<BitVector> collectHoleOptionsMask(BitVector const& choices) const;
-    
-    std::vector<std::vector<uint32_t>> collectHoleOptions(BitVector const& choices) const;
+    /** For each hole, collect options (colors) involved in any of the given choices. */
+    std::vector<std::vector<uint64_t>> collectHoleOptions(BitVector const& choices) const;
     
 protected:
 
     /** Reference to the unrefined family. */
     Family family;
     /** For each choice, a list of hole-option pairs (colors). */
-    const std::vector<std::vector<std::pair<uint32_t,uint32_t>>> choice_to_assignment;
+    const std::vector<std::vector<std::pair<uint64_t,uint64_t>>> choice_to_assignment;
 
     /** Number of choices in the quotient. */
     const uint64_t numChoices() const;
@@ -51,6 +54,9 @@ protected:
     BitVector uncolored_choices;
     /** Choices labeled by some hole. */
     BitVector colored_choices;
+
+    /** For each hole, collect options (colors) involved in any of the given choices. */
+    std::vector<BitVector> collectHoleOptionsMask(BitVector const& choices) const;
 };
 
 }

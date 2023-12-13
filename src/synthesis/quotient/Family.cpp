@@ -10,45 +10,45 @@ Family::Family() {
 }
 
 Family::Family(Family const& other) {
-    hole_options = std::vector<std::vector<uint32_t>>(other.numHoles());
+    hole_options = std::vector<std::vector<uint64_t>>(other.numHoles());
     hole_options_mask = std::vector<BitVector>(other.numHoles());
-    for(uint32_t hole = 0; hole < numHoles(); ++hole) {
+    for(uint64_t hole = 0; hole < numHoles(); ++hole) {
         hole_options[hole] = other.holeOptions(hole);
         hole_options_mask[hole] = other.holeOptionsMask(hole);
     }
 }
 
 
-uint32_t Family::numHoles() const {
+uint64_t Family::numHoles() const {
     return hole_options.size();
 }
 
-void Family::addHole(uint32_t num_options) {
+void Family::addHole(uint64_t num_options) {
     hole_options_mask.push_back(BitVector(num_options,true));
-    std::vector<uint32_t> options(num_options);
-    for(uint32_t option=0; option<num_options; ++option) {
+    std::vector<uint64_t> options(num_options);
+    for(uint64_t option=0; option<num_options; ++option) {
         options[option]=option;
     }
     hole_options.push_back(options);
 }
 
-std::vector<uint32_t> const& Family::holeOptions(uint32_t hole) const {
+std::vector<uint64_t> const& Family::holeOptions(uint64_t hole) const {
     return hole_options[hole];
 }
 
-BitVector const& Family::holeOptionsMask(uint32_t hole) const {
+BitVector const& Family::holeOptionsMask(uint64_t hole) const {
     return hole_options_mask[hole];
 }
 
 
-void Family::holeSetOptions(uint32_t hole, std::vector<uint32_t> const& options) {
+void Family::holeSetOptions(uint64_t hole, std::vector<uint64_t> const& options) {
     hole_options[hole] = options;
     hole_options_mask[hole].clear();
     for(auto option: options) {
         hole_options_mask[hole].set(option);
     }
 }
-void Family::holeSetOptions(uint32_t hole, BitVector const& options) {
+void Family::holeSetOptions(uint64_t hole, BitVector const& options) {
     hole_options[hole].clear();
     for(auto option: options) {
         hole_options[hole].push_back(option);
@@ -60,21 +60,21 @@ void Family::holeSetOptions(uint32_t hole, BitVector const& options) {
 
 
 
-uint32_t Family::holeNumOptions(uint32_t hole) const {
+uint64_t Family::holeNumOptions(uint64_t hole) const {
     return hole_options[hole].size();
 }
 
-uint32_t Family::holeNumOptionsTotal(uint32_t hole) const {
+uint64_t Family::holeNumOptionsTotal(uint64_t hole) const {
     return hole_options_mask[hole].size();
 }
 
-bool Family::holeContains(uint32_t hole, uint32_t option) const {
+bool Family::holeContains(uint64_t hole, uint64_t option) const {
     return hole_options_mask[hole][option];
 }
 
 
 bool Family::isSubsetOf(Family const& other) const {
-    for(uint32_t hole = 0; hole < numHoles(); ++hole) {
+    for(uint64_t hole = 0; hole < numHoles(); ++hole) {
         if(not hole_options_mask[hole].isSubsetOf(other.holeOptionsMask(hole))) {
             return false;
         }
@@ -82,8 +82,8 @@ bool Family::isSubsetOf(Family const& other) const {
     return true;
 }
 
-bool Family::includesAssignment(std::vector<uint32_t> const& hole_to_option) const {
-    for(uint32_t hole = 0; hole < numHoles(); ++hole) {
+bool Family::includesAssignment(std::vector<uint64_t> const& hole_to_option) const {
+    for(uint64_t hole = 0; hole < numHoles(); ++hole) {
         if(not hole_options_mask[hole][hole_to_option[hole]]) {
             return false;
         }
@@ -91,7 +91,7 @@ bool Family::includesAssignment(std::vector<uint32_t> const& hole_to_option) con
     return true;
 }
 
-bool Family::includesAssignment(std::map<uint32_t,uint32_t> const& hole_to_option) const {
+bool Family::includesAssignment(std::map<uint64_t,uint64_t> const& hole_to_option) const {
     for(auto const& [hole,option]: hole_to_option) {
         if(not hole_options_mask[hole][option]) {
             return false;
@@ -100,7 +100,7 @@ bool Family::includesAssignment(std::map<uint32_t,uint32_t> const& hole_to_optio
     return true;
 }
 
-bool Family::includesAssignment(std::vector<std::pair<uint32_t,uint32_t>> const& hole_to_option) const {
+bool Family::includesAssignment(std::vector<std::pair<uint64_t,uint64_t>> const& hole_to_option) const {
     for(auto const& [hole,option]: hole_to_option) {
     if(not hole_options_mask[hole][option]) {
             return false;

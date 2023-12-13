@@ -16,23 +16,23 @@ public:
     Family();
     Family(Family const& other);
 
-    uint32_t numHoles() const;
-    void addHole(uint32_t num_options);
+    uint64_t numHoles() const;
+    void addHole(uint64_t num_options);
     
-    std::vector<uint32_t> const& holeOptions(uint32_t hole) const;
-    BitVector const& holeOptionsMask(uint32_t hole) const;
+    std::vector<uint64_t> const& holeOptions(uint64_t hole) const;
+    BitVector const& holeOptionsMask(uint64_t hole) const;
 
-    void holeSetOptions(uint32_t hole, std::vector<uint32_t> const& options);
-    void holeSetOptions(uint32_t hole, BitVector const& options);
-    // void holeSetOptions(uint32_t hole, BitVector&& options);
+    void holeSetOptions(uint64_t hole, std::vector<uint64_t> const& options);
+    void holeSetOptions(uint64_t hole, BitVector const& options);
+    // void holeSetOptions(uint64_t hole, BitVector&& options);
 
-    uint32_t holeNumOptions(uint32_t hole) const;
-    uint32_t holeNumOptionsTotal(uint32_t hole) const;
-    bool holeContains(uint32_t hole, uint32_t option) const;
+    uint64_t holeNumOptions(uint64_t hole) const;
+    uint64_t holeNumOptionsTotal(uint64_t hole) const;
+    bool holeContains(uint64_t hole, uint64_t option) const;
 
-    bool includesAssignment(std::vector<uint32_t> const& hole_to_option) const;
-    bool includesAssignment(std::map<uint32_t,uint32_t> const& hole_to_option) const;
-    bool includesAssignment(std::vector<std::pair<uint32_t,uint32_t>> const& hole_to_option) const;
+    bool includesAssignment(std::vector<uint64_t> const& hole_to_option) const;
+    bool includesAssignment(std::map<uint64_t,uint64_t> const& hole_to_option) const;
+    bool includesAssignment(std::vector<std::pair<uint64_t,uint64_t>> const& hole_to_option) const;
     
     bool isSubsetOf(Family const& other) const;
     // uint64_t size();
@@ -49,7 +49,7 @@ public:
     
 protected:
     /** For each hole, a list of available options. */
-    std::vector<std::vector<uint32_t>> hole_options;
+    std::vector<std::vector<uint64_t>> hole_options;
     /** For each hole, a mastk of available options. */
     std::vector<BitVector> hole_options_mask;
     

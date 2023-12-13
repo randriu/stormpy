@@ -7,7 +7,7 @@ namespace synthesis {
 
 Coloring::Coloring(
     Family const& family, std::vector<uint64_t> const& row_groups,
-    std::vector<std::vector<std::pair<uint32_t,uint32_t>>> choice_to_assignment
+    std::vector<std::vector<std::pair<uint64_t,uint64_t>>> choice_to_assignment
 ) : family(family), choice_to_assignment(choice_to_assignment) {
     
     auto num_choices = numChoices();
@@ -50,7 +50,7 @@ const uint64_t Coloring::numChoices() const {
     return choice_to_assignment.size();
 }
 
-std::vector<std::vector<std::pair<uint32_t,uint32_t>>> const& Coloring::getChoiceToAssignment() const {
+std::vector<std::vector<std::pair<uint64_t,uint64_t>>> const& Coloring::getChoiceToAssignment() const {
     return choice_to_assignment;
 }
 
@@ -76,24 +76,24 @@ BitVector Coloring::selectCompatibleChoices(Family const& subfamily) const {
 
 std::vector<BitVector> Coloring::collectHoleOptionsMask(BitVector const& choices) const {
 
-    std::vector<BitVector> hole_option_mask;
-    for(uint32_t hole=0; hole<family.numHoles(); ++hole) {
-        hole_option_mask.push_back(BitVector(family.holeNumOptionsTotal(hole),false));
+    std::vector<BitVector> hole_options_mask(family.numHoles());
+    for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
+        hole_options_mask[hole] = BitVector(family.holeNumOptionsTotal(hole),false);
     }
     for(auto choice: choices) {
         for(auto const& [hole,option]: choice_to_assignment[choice]) {
-            hole_option_mask[hole].set(option,true);
+            hole_options_mask[hole].set(option,true);
         }
     }
-    return hole_option_mask;
+    return hole_options_mask;
 }
 
 
-std::vector<std::vector<uint32_t>> Coloring::collectHoleOptions(BitVector const& choices) const {
-    auto hole_option_mask = collectHoleOptionsMask(choices);
-    std::vector<std::vector<uint32_t>> hole_options(family.numHoles());
-    for(uint32_t hole=0; hole<family.numHoles(); ++hole) {
-        for(auto option: hole_option_mask[hole]) {
+std::vector<std::vector<uint64_t>> Coloring::collectHoleOptions(BitVector const& choices) const {
+    auto hole_options_mask = collectHoleOptionsMask(choices);
+    std::vector<std::vector<uint64_t>> hole_options(family.numHoles());
+    for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
+        for(auto option: hole_options_mask[hole]) {
             hole_options[hole].push_back(option);
         }
     }
