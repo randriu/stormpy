@@ -56,6 +56,18 @@ std::shared_ptr<storm::logic::Formula> transformUntilToEventually(
 }
 
 template<typename ValueType>
+std::vector<std::vector<uint64_t>> computeChoiceDestinations(storm::models::sparse::Mdp<ValueType> const& mdp) {
+    uint64_t num_choices = mdp.getNumberOfChoices();
+    std::vector<std::vector<uint64_t>> choice_destinations(num_choices);
+    for(uint64_t choice = 0; choice < num_choices; ++choice) {
+        for(auto const& entry: mdp.getTransitionMatrix().getRow(choice)) {
+            choice_destinations[choice].push_back(entry.getColumn());
+        }
+    }
+    return choice_destinations;
+}
+
+template<typename ValueType>
 std::vector<uint64_t> schedulerToStateToGlobalChoice(
     storm::storage::Scheduler<ValueType> const& scheduler, storm::models::sparse::Mdp<ValueType> const& sub_mdp,
     std::vector<uint64_t> choice_to_global_choice
@@ -281,6 +293,8 @@ void define_helpers(py::module& m) {
 
     m.def("verify_mdp", &synthesis::verifyMdp<double>);
     
+    m.def("computeChoiceDestinations", &synthesis::computeChoiceDestinations<double>);
+
     m.def("schedulerToStateToGlobalChoice", &synthesis::schedulerToStateToGlobalChoice<double>);
     m.def("computeInconsistentHoleVariance", &synthesis::computeInconsistentHoleVariance);
     
