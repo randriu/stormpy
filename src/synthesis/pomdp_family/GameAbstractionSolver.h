@@ -68,9 +68,15 @@ namespace synthesis {
         /** Solution value of the game. */
         double solution_value;
         
-        /** For each state, an action selected by Player 1. */
+        /**
+         * For each state, an action selected by Player 1. State s contains quotient_num_actions if the action was not
+         * set.
+         */
         std::vector<uint64_t> solution_state_to_player1_action;
-        /** For each state, a choice selected by Player1&Player2. */
+        /**
+         * For each state, a choice selected by Player 1 & Player2. State s contains quotient_num_choices if the
+         * choice was not set.
+         */
         std::vector<uint64_t> solution_state_to_quotient_choice;
 
         // Profiling

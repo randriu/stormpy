@@ -291,7 +291,7 @@ void define_helpers(py::module& m) {
         return result;
     }, py::arg("matrix"), py::arg("vector"));
 
-    m.def("verify_mdp", &synthesis::verifyMdp<double>);
+    // m.def("verify_mdp", &synthesis::verifyMdp<double>);
     
     m.def("computeChoiceDestinations", &synthesis::computeChoiceDestinations<double>);
 
