@@ -1,14 +1,11 @@
 #include "../synthesis.h"
 
-#include "JaniChoices.h"
 #include "ObservationEvaluator.h"
 #include "ProductPomdpFsc.h"
 #include "ProductPomdpRandomizedFsc.h"
 #include "GameAbstractionSolver.h"
 
 void bindings_pomdp_family(py::module& m) {
-
-    m.def("add_choice_labels_from_jani", &synthesis::addChoiceLabelsFromJani<double>);
 
     py::class_<synthesis::ObservationEvaluator<double>>(m, "ObservationEvaluator")
         .def(py::init<storm::prism::Program &,storm::models::sparse::Model<double> const& >(), py::arg("prism"), py::arg("model"))

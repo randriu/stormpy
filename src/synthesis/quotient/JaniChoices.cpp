@@ -1,9 +1,9 @@
 #include "JaniChoices.h"
 
-#include "storm/models/sparse/Mdp.h"
-#include "storm/storage/jani/Model.h"
-#include "storm/storage/sparse/JaniChoiceOrigins.h"
-#include "storm/storage/sparse/ModelComponents.h"
+#include <storm/models/sparse/Mdp.h>
+#include <storm/storage/jani/Model.h>
+#include <storm/storage/sparse/JaniChoiceOrigins.h>
+#include <storm/storage/sparse/ModelComponents.h>
 
 namespace synthesis {
     
