@@ -21,8 +21,7 @@
 #include "storm/environment/Environment.h"
 #include "storm/environment/solver/SolverEnvironment.h"
 
-#include <queue>
-#include <deque>
+#include <stack>
 
 namespace synthesis {
 
@@ -42,8 +41,8 @@ namespace synthesis {
     template <typename ValueType, typename StateType>
     CounterexampleGenerator<ValueType,StateType>::CounterexampleGenerator (
         storm::models::sparse::Mdp<ValueType> const& quotient_mdp,
-        uint_fast64_t hole_count,
-        std::vector<std::set<uint_fast64_t>> const& mdp_holes,
+        uint64_t hole_count,
+        std::vector<std::set<uint64_t>> const& mdp_holes,
         std::vector<std::shared_ptr<storm::logic::Formula const>> const& formulae
         ) : quotient_mdp(quotient_mdp), hole_count(hole_count), mdp_holes(mdp_holes) {
 
@@ -114,7 +113,7 @@ namespace synthesis {
     template <typename ValueType, typename StateType>
     void CounterexampleGenerator<ValueType,StateType>::prepareDtmc(
         storm::models::sparse::Dtmc<ValueType> const& dtmc,
-        std::vector<uint_fast64_t> const& state_map
+        std::vector<uint64_t> const& state_map
         ) {
         
         // Clear up previous DTMC metadata
@@ -124,18 +123,16 @@ namespace synthesis {
         // Get DTMC info
         this->dtmc = std::make_shared<storm::models::sparse::Dtmc<ValueType>>(dtmc);
         this->state_map = state_map;
-        uint_fast64_t dtmc_states = this->dtmc->getNumberOfStates();
+        uint64_t dtmc_states = this->dtmc->getNumberOfStates();
         StateType initial_state = *(this->dtmc->getInitialStates().begin());
         storm::storage::SparseMatrix<ValueType> const& transition_matrix = this->dtmc->getTransitionMatrix();
 
         // Mark all holes as unregistered
-        for(uint_fast64_t index = 0; index < this->hole_count; index++) {
-            this->hole_wave.push_back(0);
-        }
-
+        this->hole_wave.resize(this->hole_count,0);
+        
         // Associate states of a DTMC with relevant holes and store their count
-        std::vector<std::set<uint_fast64_t>> dtmc_holes(dtmc_states);
-        std::vector<uint_fast64_t> unregistered_holes_count(dtmc_states, 0);
+        std::vector<std::set<uint64_t>> dtmc_holes(dtmc_states);
+        std::vector<uint64_t> unregistered_holes_count(dtmc_states, 0);
         for(StateType state = 0; state < dtmc_states; state++) {
             dtmc_holes[state] = this->mdp_holes[state_map[state]];
             unregistered_holes_count[state] = dtmc_holes[state].size();
@@ -143,7 +140,7 @@ namespace synthesis {
 
         // Prepare to explore
         // wave increases by one when new holes of a blocking candidate are registered
-        uint_fast64_t current_wave = 0;
+        uint64_t current_wave = 0;
         // true if the state was reached during exploration (expanded states + both horizons)
         storm::storage::BitVector reachable_flag(dtmc_states, false);
         // non-blocking horizon
@@ -211,7 +208,7 @@ namespace synthesis {
             blocking_candidate_set = false;
             
             // Register all unregistered holes of this blocking state
-            for(uint_fast64_t hole: dtmc_holes[blocking_candidate]) {
+            for(uint64_t hole: dtmc_holes[blocking_candidate]) {
                 if(this->hole_wave[hole] == 0) {
                     hole_wave[hole] = current_wave;
                     // std::cout << "[storm] hole " << hole << " expanded in wave " << current_wave << std::endl;
@@ -221,7 +218,7 @@ namespace synthesis {
             // Recompute number of unregistered holes in each state
             for(StateType state = 0; state < dtmc_states; state++) {
                 unregistered_holes_count[state] = 0;
-                for(uint_fast64_t hole: dtmc_holes[state]) {
+                for(uint64_t hole: dtmc_holes[state]) {
                     if(this->hole_wave[hole] == 0) {
                         unregistered_holes_count[state]++;
                     }
@@ -250,7 +247,7 @@ namespace synthesis {
 
     template <typename ValueType, typename StateType>
     void CounterexampleGenerator<ValueType,StateType>::prepareSubdtmc (
-        uint_fast64_t formula_index,
+        uint64_t formula_index,
         std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
         std::vector<StateType> const& mdp_quotient_state_map,
         std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
@@ -262,8 +259,8 @@ namespace synthesis {
         StateType dtmc_states = dtmc->getNumberOfStates();
         
         // Introduce expanded state space
-        uint_fast64_t sink_state_false = dtmc_states;
-        uint_fast64_t sink_state_true = dtmc_states+1;
+        uint64_t sink_state_false = dtmc_states;
+        uint64_t sink_state_true = dtmc_states+1;
 
         // Label target states of a DTMC
         std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult const> mdp_target = this->mdp_targets[formula_index];
@@ -288,7 +285,7 @@ namespace synthesis {
         if(have_bounds) {
             auto const& mdp_values = mdp_bounds->getValueVector();
             quotient_mdp_bounds.resize(this->quotient_mdp.getNumberOfStates());
-            uint_fast64_t mdp_states = mdp_values.size();
+            uint64_t mdp_states = mdp_values.size();
             for(StateType state = 0; state < mdp_states; state++) {
                 quotient_mdp_bounds[mdp_quotient_state_map[state]] = mdp_values[state];
             }
@@ -337,7 +334,7 @@ namespace synthesis {
 
     template <typename ValueType, typename StateType>
     bool CounterexampleGenerator<ValueType,StateType>::expandAndCheck (
-        uint_fast64_t index,
+        uint64_t index,
         ValueType formula_bound,
         std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
         storm::models::sparse::StateLabeling const& labeling_subdtmc,
@@ -346,7 +343,7 @@ namespace synthesis {
     ) {
         
         // Get DTMC info
-        uint_fast64_t dtmc_states = this->dtmc->getNumberOfStates();
+        uint64_t dtmc_states = this->dtmc->getNumberOfStates();
         storm::storage::SparseMatrix<ValueType> const& transition_matrix = this->dtmc->getTransitionMatrix();
         StateType initial_state = *(this->dtmc->getInitialStates().begin());
         
@@ -430,8 +427,8 @@ namespace synthesis {
     }
 
     template <typename ValueType, typename StateType>
-    std::vector<uint_fast64_t> CounterexampleGenerator<ValueType,StateType>::constructConflict (
-        uint_fast64_t formula_index,
+    std::vector<uint64_t> CounterexampleGenerator<ValueType,StateType>::constructConflict (
+        uint64_t formula_index,
         ValueType formula_bound,
         std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
         std::vector<StateType> const& mdp_quotient_state_map
@@ -453,11 +450,11 @@ namespace synthesis {
         );
 
         // Explore subDTMCs wave by wave
-        uint_fast64_t wave_last = this->wave_states.size()-1;
-        uint_fast64_t wave = 0;
+        uint64_t wave_last = this->wave_states.size()-1;
+        uint64_t wave = 0;
 
         /*std::cout << "[storm] hole-wave: ";
-        for(uint_fast64_t hole = 0; hole < this->hole_count; hole++) {
+        for(uint64_t hole = 0; hole < this->hole_count; hole++) {
             std::cout << this->hole_wave[hole] << ",";
         }
         std::cout << std::endl;*/
@@ -477,9 +474,9 @@ namespace synthesis {
         }
 
         // Return a set of critical holes
-        std::vector<uint_fast64_t> critical_holes;
-        for(uint_fast64_t hole = 0; hole < this->hole_count; hole++) {
-            uint_fast64_t wave_registered = this->hole_wave[hole];
+        std::vector<uint64_t> critical_holes;
+        for(uint64_t hole = 0; hole < this->hole_count; hole++) {
+            uint64_t wave_registered = this->hole_wave[hole];
             if(wave_registered > 0 && wave_registered <= wave) {
                 critical_holes.push_back(hole);
             }
@@ -499,6 +496,6 @@ namespace synthesis {
 
 
      // Explicitly instantiate functions and classes.
-    template class CounterexampleGenerator<double, uint_fast64_t>;
+    template class CounterexampleGenerator<double, uint64_t>;
 
 }

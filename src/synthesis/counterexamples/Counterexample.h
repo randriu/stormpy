@@ -11,7 +11,7 @@
 
 namespace synthesis {
 
-    template<typename ValueType = double, typename StateType = uint_fast64_t>
+    template<typename ValueType = double, typename StateType = uint64_t>
     class CounterexampleGenerator {
     public:
 
@@ -28,8 +28,8 @@ namespace synthesis {
          */
         CounterexampleGenerator(
             storm::models::sparse::Mdp<ValueType> const& quotient_mdp,
-            uint_fast64_t hole_count,
-            std::vector<std::set<uint_fast64_t>> const& mdp_holes,
+            uint64_t hole_count,
+            std::vector<std::set<uint64_t>> const& mdp_holes,
             std::vector<std::shared_ptr<storm::logic::Formula const>> const& formulae
             );
 
@@ -46,7 +46,7 @@ namespace synthesis {
          */
         void prepareDtmc(
             storm::models::sparse::Dtmc<ValueType> const& dtmc,
-            std::vector<uint_fast64_t> const& state_map
+            std::vector<uint64_t> const& state_map
             );
         
         /*!
@@ -58,8 +58,8 @@ namespace synthesis {
          * @param mdp_quotient_state_mdp A mapping of MDP states to the states of a quotient MDP.
          * @return A list of holes relevant in the CE.
          */
-        std::vector<uint_fast64_t> constructConflict(
-            uint_fast64_t formula_index,
+        std::vector<uint64_t> constructConflict(
+            uint64_t formula_index,
             ValueType formula_bound,
             std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
             std::vector<StateType> const& mdp_quotient_state_map
@@ -90,7 +90,7 @@ namespace synthesis {
          *   for the initial sub-DTMC.
          */
         void prepareSubdtmc(
-            uint_fast64_t formula_index,
+            uint64_t formula_index,
             std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
             std::vector<StateType> const& mdp_quotient_state_map,
             std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
@@ -109,7 +109,7 @@ namespace synthesis {
          * @return true if the rerouting still satisfies the formula
          */
         bool expandAndCheck(
-            uint_fast64_t index,
+            uint64_t index,
             ValueType formula_bound,
             std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
             storm::models::sparse::StateLabeling const& labeling_subdtmc,
@@ -120,9 +120,9 @@ namespace synthesis {
         // Quotient MDP
         storm::models::sparse::Mdp<ValueType> const& quotient_mdp;
         // Number of significant holes
-        uint_fast64_t hole_count;
+        uint64_t hole_count;
         // Significant holes in MDP states
-        std::vector<std::set<uint_fast64_t>> mdp_holes;
+        std::vector<std::set<uint64_t>> mdp_holes;
 
         // Formula bounds: safety (<,<=) or liveness (>,>=)
         std::vector<bool> formula_safety;
@@ -145,9 +145,9 @@ namespace synthesis {
         // DTMC under investigation
         std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> dtmc;
         // DTMC to MDP state mapping
-        std::vector<uint_fast64_t> state_map;
+        std::vector<uint64_t> state_map;
         // For each hole, a wave when it was registered (0 = unregistered).
-        std::vector<uint_fast64_t> hole_wave;
+        std::vector<uint64_t> hole_wave;
         // For each wave, a set of states that were expanded.
         std::vector<std::vector<StateType>> wave_states;
 

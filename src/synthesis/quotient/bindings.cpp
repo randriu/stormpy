@@ -14,7 +14,7 @@
 namespace synthesis {
 
 template<typename ValueType>
-std::pair<storm::storage::BitVector,std::vector<std::vector<std::pair<uint64_t,uint64_t>>>> janeMapChoicesToHoleAssignments(
+std::pair<storm::storage::BitVector,std::vector<std::vector<std::pair<uint64_t,uint64_t>>>> janiMapChoicesToHoleAssignments(
     storm::models::sparse::Mdp<ValueType> const& mdp,
     Family const& family,
     std::map<uint64_t,std::vector<std::pair<uint64_t,uint64_t>>> edge_to_hole_assignment
@@ -260,7 +260,7 @@ storm::storage::BitVector policyToChoicesForFamily(
 
 void bindings_coloring(py::module& m) {
 
-    m.def("janeMapChoicesToHoleAssignments", &synthesis::janeMapChoicesToHoleAssignments<double>);
+    m.def("janiMapChoicesToHoleAssignments", &synthesis::janiMapChoicesToHoleAssignments<double>);
     m.def("addChoiceLabelsFromJani", &synthesis::addChoiceLabelsFromJani<double>);
 
     m.def("computeChoiceDestinations", &synthesis::computeChoiceDestinations<double>);
